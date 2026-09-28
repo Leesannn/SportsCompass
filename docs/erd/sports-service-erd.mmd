@@ -1,0 +1,242 @@
+erDiagram
+    UploadBatch {
+        BigAutoField id PK
+        CharField dataset_type
+        CharField original_filename
+        FileField temporary_file
+        CharField sheet_name
+        CharField encoding
+        CharField status
+        PositiveBigIntegerField row_count
+        PositiveBigIntegerField success_count
+        PositiveBigIntegerField failure_count
+        PositiveBigIntegerField duplicate_count
+        JSONField columns
+        JSONField missing_counts
+        JSONField preview_rows
+        JSONField field_mapping
+        JSONField errors
+        DateTimeField created_at
+        DateTimeField completed_at
+    }
+    Institution {
+        BigAutoField id PK
+        CharField name
+        CharField normalized_name
+        CharField region
+        CharField normalized_region
+        CharField address
+        CharField normalized_address
+        CharField institution_type
+    }
+    CanonicalSport {
+        BigAutoField id PK
+        CharField name
+        CharField normalized_name UK
+        PositiveBigIntegerField qualification_count
+        BooleanField is_active
+    }
+    DataSource {
+        BigAutoField id PK
+        CharField filename UK
+    }
+    ProgramMatchPayload {
+        BigAutoField id PK
+        CharField payload_key UK
+        JSONField rules
+        JSONField candidates
+    }
+    Program {
+        BigAutoField id PK
+        ForeignKey institution_id FK
+        CharField source_key UK
+        CharField name
+        CharField normalized_name
+        CharField sport
+        CharField normalized_sport
+        CharField target
+        CharField weekdays
+        TimeField start_time
+        TimeField end_time
+        DateField start_date
+        DateField end_date
+        PositiveIntegerField capacity
+        CharField status
+        ForeignKey source_id FK
+        CharField program_type
+        CharField facility_industry
+        ForeignKey matched_sport_id FK
+        CharField match_grade
+        PositiveSmallIntegerField match_confidence
+        TextField match_reason
+        ForeignKey match_payload_id FK
+        BooleanField match_is_manual
+    }
+    ProgramCleanupDetail {
+        BigAutoField id PK
+        CharField detail_key UK
+        TextField evidence
+        JSONField rules
+    }
+    ProgramCleanup {
+        BigAutoField id PK
+        OneToOneField program_id FK
+        CharField cleaned_name
+        ForeignKey matched_sport_id FK
+        CharField operating_status
+        BooleanField is_usable
+        CharField exclusion_reason
+        ForeignKey detail_id FK
+        DateField reference_date
+    }
+    QualificationAggregate {
+        BigAutoField id PK
+        PositiveSmallIntegerField acquisition_year
+        CharField region
+        CharField normalized_region
+        CharField sport
+        CharField normalized_sport
+        CharField qualification_type
+        CharField grade
+        PositiveIntegerField acquisition_count
+        CharField source_filename
+    }
+    ApplicationStatus {
+        BigAutoField id PK
+        ForeignKey program_id FK
+        CharField source_key UK
+        DateField reference_date
+        PositiveIntegerField capacity
+        PositiveIntegerField applicants
+        PositiveIntegerField waitlist
+        BooleanField is_synthetic
+    }
+    ExamSchedule {
+        BigAutoField id PK
+        CharField grade_code
+        CharField grade_name
+        CharField phase
+        CharField season
+        CharField course_type
+        CharField milestone
+        DateTimeField start_at
+        DateTimeField end_at
+        CharField raw_text
+        DateTimeField fetched_at
+    }
+    ExamScheduleFetchStatus {
+        BigAutoField id PK
+        CharField grade_code UK
+        DateTimeField last_success_at
+        DateTimeField last_checked_at
+        TextField last_error
+    }
+    PhoneIdentity {
+        BigAutoField id PK
+        CharField phone_hash UK
+        CharField phone_masked
+        CharField password_hash
+        DateTimeField first_seen_at
+    }
+    CenterContact {
+        BigAutoField id PK
+        CharField phone_hash UK
+        CharField phone_masked
+        CharField password_hash
+        ForeignKey institution_id FK
+        CharField institution_name
+        CharField business_reg_no
+        DateTimeField verified_at
+    }
+    Posting {
+        BigAutoField id PK
+        ForeignKey manager_id FK
+        ForeignKey sport_id FK
+        DateField work_date
+        TimeField start_time
+        TimeField end_time
+        CharField region
+        CharField normalized_region
+        CharField address
+        JSONField required_certifications
+        PositiveIntegerField pay_amount
+        CharField pay_unit
+        PositiveSmallIntegerField headcount
+        TextField description
+        CharField status
+        DateTimeField created_at
+    }
+    Application {
+        BigAutoField id PK
+        ForeignKey posting_id FK
+        ForeignKey phone_identity_id FK
+        CharField phone_masked
+        BooleanField certification_verified
+        DateTimeField applied_at
+    }
+    ReputationRecord {
+        BigAutoField id PK
+        ForeignKey phone_identity_id FK
+        ForeignKey posting_id FK
+        BooleanField is_no_show
+        BooleanField is_complaint
+        JSONField positive_tags
+        TextField comment
+        DateTimeField occurred_at
+        ForeignKey created_by_id FK
+        BooleanField is_hidden
+        TextField hidden_reason
+        DateTimeField hidden_at
+        ForeignKey hidden_by_id FK
+    }
+    Post {
+        BigAutoField id PK
+        CharField category
+        CharField title
+        CharField nickname
+        CharField password_hash
+        TextField content
+        PositiveIntegerField view_count
+        BooleanField is_notice
+        DateTimeField created_at
+        DateTimeField updated_at
+    }
+    Comment {
+        BigAutoField id PK
+        ForeignKey post_id FK
+        CharField nickname
+        CharField password_hash
+        TextField content
+        DateTimeField created_at
+    }
+    User {
+        AutoField id PK
+        CharField password
+        DateTimeField last_login
+        BooleanField is_superuser
+        CharField username UK
+        CharField first_name
+        CharField last_name
+        CharField email
+        BooleanField is_staff
+        BooleanField is_active
+        DateTimeField date_joined
+    }
+    Institution ||--o{ Program : "institution"
+    DataSource |o--o{ Program : "source"
+    CanonicalSport |o--o{ Program : "matched_sport"
+    ProgramMatchPayload |o--o{ Program : "match_payload"
+    Program ||--o| ProgramCleanup : "program"
+    CanonicalSport |o--o{ ProgramCleanup : "matched_sport"
+    ProgramCleanupDetail |o--o{ ProgramCleanup : "detail"
+    Program ||--o{ ApplicationStatus : "program"
+    Institution |o--o{ CenterContact : "institution"
+    CenterContact ||--o{ Posting : "manager"
+    CanonicalSport ||--o{ Posting : "sport"
+    Posting ||--o{ Application : "posting"
+    PhoneIdentity ||--o{ Application : "phone_identity"
+    PhoneIdentity ||--o{ ReputationRecord : "phone_identity"
+    Posting |o--o{ ReputationRecord : "posting"
+    CenterContact |o--o{ ReputationRecord : "created_by"
+    User |o--o{ ReputationRecord : "hidden_by"
+    Post ||--o{ Comment : "post"
