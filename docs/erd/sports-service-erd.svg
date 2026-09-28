@@ -1,0 +1,346 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2940" height="2540" viewBox="0 0 2940 2540"><rect width="100%" height="100%" fill="#f4f7fb"/>
+<text x="80" y="93" font-family="Malgun Gothic, sans-serif" font-size="48" fill="#20334d">SPORTS SERVICE  /  데이터 모델 ERD</text>
+<text x="80" y="139" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#20334d">현재 Django 모델 기준 · 업무 테이블 19개 + 참조 사용자 모델 1개 · 주요 필드 요약</text>
+<text x="80" y="185" font-family="Malgun Gothic, sans-serif" font-size="22" fill="#20334d">PK 기본키   FK 외래키   UK 단일 고유값   ? NULL 허용   |   관계선: 부모 → 자식, 1 또는 0..1 / 0..N</text>
+<text x="80" y="252" font-family="Malgun Gothic, sans-serif" font-size="34" fill="#175a8a">01  ANALYTICS · default / SQLite</text>
+<text x="80" y="1549" font-family="Malgun Gothic, sans-serif" font-size="34" fill="#137b68">02  SUBSTITUTES · default / SQLite</text>
+<text x="2400" y="1542" font-family="Malgun Gothic, sans-serif" font-size="27" fill="#8750a0">03  COMMUNITY</text>
+<text x="2400" y="1577" font-family="Malgun Gothic, sans-serif" font-size="22" fill="#8750a0">community / PostgreSQL</text>
+<polyline points="530,410 595,410 595,410 660,410" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="648,403 660,410 648,417" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="885,710 885,600" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="878,612 885,600 892,612" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="305,710 305,655 715,655 715,600" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="708,612 715,600 722,612" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1240,810 1165,810 1165,545 1110,545" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1122,538 1110,545 1122,552" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1110,380 1240,380" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1228,373 1240,380 1228,387" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="530,865 580,865 580,640 1300,640 1300,600" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1293,612 1300,600 1307,612" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1820,430 1690,430" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1702,423 1690,430 1702,437" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1110,470 1195,470 1195,665 2045,665 2045,710" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="2038,698 2045,710 2052,698" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="80,390 35,390 35,1685 80,1685" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="68,1678 80,1685 68,1692" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="530,1720 660,1720" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="648,1713 660,1720 648,1727" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="305,1010 305,1070 610,1070 610,1470 1000,1470 1000,1610" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="993,1598 1000,1610 1007,1598" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1110,1720 1240,1720" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1228,1713 1240,1720 1228,1727" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1820,1810 1690,1810" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1702,1803 1690,1810 1702,1817" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="2045,1910 2045,1980 1560,1980 1560,2070" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1553,2058 1560,2070 1567,2058" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="885,1910 885,2160 1240,2160" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1228,2153 1240,2160 1228,2167" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="305,1910 305,2270 1240,2270" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1228,2263 1240,2270 1228,2277" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1820,2210 1690,2210" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="1702,2203 1690,2210 1702,2217" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="2625,1910 2625,2070" fill="none" stroke="#788aa1" stroke-width="3"/>
+<polyline points="2618,2058 2625,2070 2632,2058" fill="none" stroke="#788aa1" stroke-width="3"/>
+<rect x="80" y="1120" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="80" y="1120" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="96" y="1152" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">UploadBatch</text>
+<text x="96" y="1181" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">업로드 이력</text>
+<text x="96" y="1227" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="172" y="1229" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="96" y="1254" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="172" y="1256" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">dataset_type</text>
+<text x="96" y="1281" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="172" y="1283" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">original_filename</text>
+<text x="96" y="1308" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="172" y="1310" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">status</text>
+<text x="96" y="1408" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 14개 필드 · 전체 명세 참조</text>
+<rect x="80" y="300" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="80" y="300" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="96" y="332" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">Institution</text>
+<text x="96" y="361" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">기관</text>
+<text x="96" y="407" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="172" y="409" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="96" y="434" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="172" y="436" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">name</text>
+<text x="96" y="461" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="172" y="463" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">region</text>
+<text x="96" y="488" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="172" y="490" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">address</text>
+<text x="96" y="588" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 4개 필드 · 전체 명세 참조</text>
+<rect x="80" y="710" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="80" y="710" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="96" y="742" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">CanonicalSport</text>
+<text x="96" y="771" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">기준 종목</text>
+<text x="96" y="817" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="172" y="819" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="96" y="844" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="172" y="846" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">name</text>
+<text x="96" y="871" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">UK</text>
+<text x="172" y="873" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">normalized_name</text>
+<text x="96" y="998" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 2개 필드 · 전체 명세 참조</text>
+<rect x="660" y="710" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="660" y="710" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="676" y="742" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">DataSource</text>
+<text x="676" y="771" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">데이터 출처</text>
+<text x="676" y="817" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="752" y="819" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="676" y="844" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">UK</text>
+<text x="752" y="846" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">filename</text>
+<rect x="1240" y="710" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="1240" y="710" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="1256" y="742" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">ProgramMatchPayload</text>
+<text x="1256" y="771" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">프로그램 매칭 상세</text>
+<text x="1256" y="817" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="1332" y="819" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="1256" y="844" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">UK</text>
+<text x="1332" y="846" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">payload_key</text>
+<text x="1256" y="871" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1332" y="873" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">rules</text>
+<text x="1256" y="898" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1332" y="900" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">candidates</text>
+<rect x="660" y="300" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="660" y="300" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="676" y="332" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">Program</text>
+<text x="676" y="361" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">운영 프로그램</text>
+<text x="676" y="407" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="752" y="409" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="676" y="434" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">FK</text>
+<text x="752" y="436" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">institution_id</text>
+<text x="676" y="461" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="752" y="463" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">name</text>
+<text x="676" y="488" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">FK</text>
+<text x="752" y="490" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">source_id ?</text>
+<text x="676" y="515" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">FK</text>
+<text x="752" y="517" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">matched_sport_id ?</text>
+<text x="676" y="542" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">FK</text>
+<text x="752" y="544" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">match_payload_id ?</text>
+<text x="676" y="588" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 18개 필드 · 전체 명세 참조</text>
+<rect x="1820" y="300" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="1820" y="300" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="1836" y="332" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">ProgramCleanupDetail</text>
+<text x="1836" y="361" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">프로그램 정리 상세</text>
+<text x="1836" y="407" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="1912" y="409" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="1836" y="434" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">UK</text>
+<text x="1912" y="436" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">detail_key</text>
+<text x="1836" y="461" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1912" y="463" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">evidence</text>
+<text x="1836" y="488" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1912" y="490" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">rules</text>
+<rect x="1240" y="300" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="1240" y="300" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="1256" y="332" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">ProgramCleanup</text>
+<text x="1256" y="361" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">프로그램 정리 결과</text>
+<text x="1256" y="407" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="1332" y="409" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="1256" y="434" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">FK UK</text>
+<text x="1332" y="436" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">program_id</text>
+<text x="1256" y="461" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">FK</text>
+<text x="1332" y="463" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">matched_sport_id ?</text>
+<text x="1256" y="488" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">FK</text>
+<text x="1332" y="490" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">detail_id ?</text>
+<text x="1256" y="515" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1332" y="517" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">is_usable</text>
+<text x="1256" y="588" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 4개 필드 · 전체 명세 참조</text>
+<rect x="660" y="1120" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="660" y="1120" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="676" y="1152" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">QualificationAggregate</text>
+<text x="676" y="1181" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">지도자 자격 취득 현황</text>
+<text x="676" y="1227" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="752" y="1229" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="676" y="1254" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="752" y="1256" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">acquisition_year ?</text>
+<text x="676" y="1281" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="752" y="1283" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">normalized_sport</text>
+<text x="676" y="1308" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="752" y="1310" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">acquisition_count</text>
+<text x="676" y="1408" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 6개 필드 · 전체 명세 참조</text>
+<rect x="1820" y="710" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="1820" y="710" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="1836" y="742" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">ApplicationStatus</text>
+<text x="1836" y="771" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">프로그램 신청 현황</text>
+<text x="1836" y="817" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="1912" y="819" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="1836" y="844" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">FK</text>
+<text x="1912" y="846" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">program_id</text>
+<text x="1836" y="871" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1912" y="873" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">reference_date ?</text>
+<text x="1836" y="898" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1912" y="900" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">capacity ?</text>
+<text x="1836" y="925" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1912" y="927" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">applicants ?</text>
+<text x="1836" y="998" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 3개 필드 · 전체 명세 참조</text>
+<rect x="1240" y="1120" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="1240" y="1120" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="1256" y="1152" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">ExamSchedule</text>
+<text x="1256" y="1181" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">연간일정계획 캐시</text>
+<text x="1256" y="1227" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="1332" y="1229" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="1256" y="1254" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1332" y="1256" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">grade_code</text>
+<text x="1256" y="1281" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1332" y="1283" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">phase</text>
+<text x="1256" y="1308" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1332" y="1310" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">start_at ?</text>
+<text x="1256" y="1335" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1332" y="1337" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">end_at ?</text>
+<text x="1256" y="1408" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 6개 필드 · 전체 명세 참조</text>
+<rect x="1820" y="1120" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="1820" y="1120" width="450" height="77" rx="10" fill="#175a8a" stroke="#175a8a" stroke-width="2"/>
+<text x="1836" y="1152" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">ExamScheduleFetchStatus</text>
+<text x="1836" y="1181" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">연간일정계획 갱신 상태</text>
+<text x="1836" y="1227" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">PK</text>
+<text x="1912" y="1229" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="1836" y="1254" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a">UK</text>
+<text x="1912" y="1256" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">grade_code</text>
+<text x="1836" y="1281" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1912" y="1283" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">last_success_at ?</text>
+<text x="1836" y="1308" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#175a8a"></text>
+<text x="1912" y="1310" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">last_error</text>
+<text x="1836" y="1408" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 1개 필드 · 전체 명세 참조</text>
+<rect x="1820" y="1610" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="1820" y="1610" width="450" height="77" rx="10" fill="#137b68" stroke="#137b68" stroke-width="2"/>
+<text x="1836" y="1642" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">PhoneIdentity</text>
+<text x="1836" y="1671" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">전화번호 신원</text>
+<text x="1836" y="1717" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">PK</text>
+<text x="1912" y="1719" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="1836" y="1744" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">UK</text>
+<text x="1912" y="1746" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">phone_hash</text>
+<text x="1836" y="1771" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68"></text>
+<text x="1912" y="1773" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">phone_masked</text>
+<text x="1836" y="1898" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 2개 필드 · 전체 명세 참조</text>
+<rect x="80" y="1610" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="80" y="1610" width="450" height="77" rx="10" fill="#137b68" stroke="#137b68" stroke-width="2"/>
+<text x="96" y="1642" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">CenterContact</text>
+<text x="96" y="1671" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">센터 담당자</text>
+<text x="96" y="1717" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">PK</text>
+<text x="172" y="1719" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="96" y="1744" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">FK</text>
+<text x="172" y="1746" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">institution_id ?</text>
+<text x="96" y="1771" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68"></text>
+<text x="172" y="1773" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">institution_name</text>
+<text x="96" y="1798" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">UK</text>
+<text x="172" y="1800" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">phone_hash</text>
+<text x="96" y="1898" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 4개 필드 · 전체 명세 참조</text>
+<rect x="660" y="1610" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="660" y="1610" width="450" height="77" rx="10" fill="#137b68" stroke="#137b68" stroke-width="2"/>
+<text x="676" y="1642" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">Posting</text>
+<text x="676" y="1671" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">대타 공고</text>
+<text x="676" y="1717" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">PK</text>
+<text x="752" y="1719" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="676" y="1744" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">FK</text>
+<text x="752" y="1746" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">manager_id</text>
+<text x="676" y="1771" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">FK</text>
+<text x="752" y="1773" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">sport_id</text>
+<text x="676" y="1798" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68"></text>
+<text x="752" y="1800" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">work_date</text>
+<text x="676" y="1825" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68"></text>
+<text x="752" y="1827" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">status</text>
+<text x="676" y="1898" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 11개 필드 · 전체 명세 참조</text>
+<rect x="1240" y="1610" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="1240" y="1610" width="450" height="77" rx="10" fill="#137b68" stroke="#137b68" stroke-width="2"/>
+<text x="1256" y="1642" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">Application</text>
+<text x="1256" y="1671" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">신청</text>
+<text x="1256" y="1717" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">PK</text>
+<text x="1332" y="1719" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="1256" y="1744" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">FK</text>
+<text x="1332" y="1746" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">posting_id</text>
+<text x="1256" y="1771" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">FK</text>
+<text x="1332" y="1773" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">phone_identity_id</text>
+<text x="1256" y="1798" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68"></text>
+<text x="1332" y="1800" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">applied_at</text>
+<text x="1256" y="1898" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 2개 필드 · 전체 명세 참조</text>
+<rect x="1240" y="2070" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="1240" y="2070" width="450" height="77" rx="10" fill="#137b68" stroke="#137b68" stroke-width="2"/>
+<text x="1256" y="2102" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">ReputationRecord</text>
+<text x="1256" y="2131" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">평판 기록</text>
+<text x="1256" y="2177" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">PK</text>
+<text x="1332" y="2179" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="1256" y="2204" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">FK</text>
+<text x="1332" y="2206" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">phone_identity_id</text>
+<text x="1256" y="2231" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">FK</text>
+<text x="1332" y="2233" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">posting_id ?</text>
+<text x="1256" y="2258" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">FK</text>
+<text x="1332" y="2260" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">created_by_id ?</text>
+<text x="1256" y="2285" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68">FK</text>
+<text x="1332" y="2287" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">hidden_by_id ?</text>
+<text x="1256" y="2312" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#137b68"></text>
+<text x="1332" y="2314" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">is_hidden</text>
+<text x="1256" y="2358" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 7개 필드 · 전체 명세 참조</text>
+<rect x="2400" y="1610" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="2400" y="1610" width="450" height="77" rx="10" fill="#8750a0" stroke="#8750a0" stroke-width="2"/>
+<text x="2416" y="1642" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">Post</text>
+<text x="2416" y="1671" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">게시글</text>
+<text x="2416" y="1717" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#8750a0">PK</text>
+<text x="2492" y="1719" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="2416" y="1744" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#8750a0"></text>
+<text x="2492" y="1746" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">category</text>
+<text x="2416" y="1771" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#8750a0"></text>
+<text x="2492" y="1773" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">title</text>
+<text x="2416" y="1798" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#8750a0"></text>
+<text x="2492" y="1800" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">nickname</text>
+<text x="2416" y="1898" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 6개 필드 · 전체 명세 참조</text>
+<rect x="2400" y="2070" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="2400" y="2070" width="450" height="77" rx="10" fill="#8750a0" stroke="#8750a0" stroke-width="2"/>
+<text x="2416" y="2102" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">Comment</text>
+<text x="2416" y="2131" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">댓글</text>
+<text x="2416" y="2177" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#8750a0">PK</text>
+<text x="2492" y="2179" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="2416" y="2204" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#8750a0">FK</text>
+<text x="2492" y="2206" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">post_id</text>
+<text x="2416" y="2231" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#8750a0"></text>
+<text x="2492" y="2233" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">nickname</text>
+<text x="2416" y="2258" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#8750a0"></text>
+<text x="2492" y="2260" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">content</text>
+<text x="2416" y="2358" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 2개 필드 · 전체 명세 참조</text>
+<rect x="1820" y="2070" width="450" height="300" rx="12" fill="#ffffff" stroke="#d5dfeb" stroke-width="2"/>
+<rect x="1820" y="2070" width="450" height="77" rx="10" fill="#64748b" stroke="#64748b" stroke-width="2"/>
+<text x="1836" y="2102" font-family="Malgun Gothic, sans-serif" font-size="24" fill="#ffffff">User</text>
+<text x="1836" y="2131" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#e5eff7">관리자 사용자 (참조 모델)</text>
+<text x="1836" y="2177" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#64748b">PK</text>
+<text x="1912" y="2179" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">id</text>
+<text x="1836" y="2204" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#64748b">UK</text>
+<text x="1912" y="2206" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">username</text>
+<text x="1836" y="2231" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#64748b"></text>
+<text x="1912" y="2233" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#20334d">is_staff</text>
+<text x="1836" y="2358" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#78879c">+ 8개 필드 · 전체 명세 참조</text>
+<text x="540" y="400" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">1</text>
+<text x="605" y="400" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="895" y="700" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..1</text>
+<text x="895" y="623" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="315" y="700" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..1</text>
+<text x="725" y="623" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="1185" y="800" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..1</text>
+<text x="1120" y="535" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="1120" y="370" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">1</text>
+<text x="1185" y="370" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..1</text>
+<text x="540" y="855" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..1</text>
+<text x="1310" y="623" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="1765" y="420" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..1</text>
+<text x="1700" y="420" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="1120" y="460" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">1</text>
+<text x="2055" y="700" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="25" y="380" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..1</text>
+<text x="25" y="1675" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="540" y="1710" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">1</text>
+<text x="605" y="1710" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="315" y="1033" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">1</text>
+<text x="1010" y="1600" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="1120" y="1710" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">1</text>
+<text x="1185" y="1710" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="1765" y="1800" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">1</text>
+<text x="1700" y="1800" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="2055" y="1933" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">1</text>
+<text x="1570" y="2060" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="895" y="1933" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..1</text>
+<text x="1185" y="2150" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="315" y="1933" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..1</text>
+<text x="1185" y="2260" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="1765" y="2200" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..1</text>
+<text x="1700" y="2200" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="2635" y="1933" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">1</text>
+<text x="2635" y="2060" font-family="Malgun Gothic, sans-serif" font-size="18" fill="#20334d">0..N</text>
+<text x="80" y="2432" font-family="Malgun Gothic, sans-serif" font-size="22" fill="#20334d">관계선은 실제 ForeignKey / OneToOneField만 표시합니다. 종목명·등급코드가 같아도 외래키가 없으면 연결하지 않습니다.</text>
+<text x="80" y="2470" font-family="Malgun Gothic, sans-serif" font-size="20" fill="#61728a">recommendations는 자체 모델 없음 · Django 내부 인증/세션 테이블은 User 참조 외 생략 · 실제 DB 적용 상태가 아닌 소스 모델 기준</text>
+</svg>
