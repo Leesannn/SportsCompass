@@ -31,7 +31,7 @@
 
 .program-hero {
   display: grid;
-  grid-template-columns: minmax(510px,.8fr) 1.2fr;
+  grid-template-columns: minmax(1200px,.8fr) 1.2fr;
   align-items: center;
   gap: 24px;
   min-height: 170px;
