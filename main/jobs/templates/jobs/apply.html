@@ -1,0 +1,16 @@
+{% extends 'analytics/base.html' %}
+{% block title %}일자리 지원 | 스포츠 커리어 나침반{% endblock %}
+{% block content %}
+<div class="recommend-shell form-shell">
+  <div class="form-heading text-center">
+    <a href="{% url 'jobs:job_detail' posting.pk %}" class="back-link">← 공고로 돌아가기</a>
+    <span class="eyebrow">일자리 지원</span>
+    <h1>{{ posting.manager.institution_name }} 지원하기</h1>
+    <p>이 번호로 지원 이력이 누적됩니다. 다음에 같은 번호로 지원할 때는 지금 입력하는 비밀번호가 필요합니다. 필요 자격증 보유 여부는 지원 직후 자동으로 대조합니다.</p>
+  </div>
+  <form method="post" class="recommend-form" novalidate>
+    {% include 'jobs/_form_fields.html' %}
+    <div class="form-actions"><button class="primary-action" type="submit">지원하기</button></div>
+  </form>
+</div>
+{% endblock %}

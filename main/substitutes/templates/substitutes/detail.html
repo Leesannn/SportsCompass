@@ -33,6 +33,12 @@
   <div class="empty-state">이미 마감되었거나 완료된 공고입니다.</div>
   {% endif %}
 
-  <p class="text-center text-secondary small mt-3">공고를 등록한 담당자이신가요? <a href="{% url 'substitutes:posting_delete_request' posting.pk %}">공고 삭제하기</a></p>
+  <div class="manager-actions mt-4">
+    <p class="text-center text-secondary small mb-2">공고를 등록한 담당자이신가요?</p>
+    <div class="d-flex justify-content-center gap-2">
+      <a href="{% url 'substitutes:posting_edit_request' posting.pk %}" class="btn btn-outline-secondary px-4">공고 수정하기</a>
+      <a href="{% url 'substitutes:posting_delete_request' posting.pk %}" class="btn btn-outline-danger px-4">공고 삭제하기</a>
+    </div>
+  </div>
 </div>
 {% endblock %}

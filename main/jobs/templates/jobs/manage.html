@@ -1,0 +1,32 @@
+{% extends 'analytics/base.html' %}
+{% block title %}지원자 관리 | {{ posting.manager.institution_name }}{% endblock %}
+{% block content %}
+<div class="form-shell mx-auto">
+  <div class="mb-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div><span class="badge {% if posting.status == 'recruiting' %}text-bg-primary{% else %}text-bg-secondary{% endif %}">{{ posting.get_status_display }}</span> <span class="text-secondary small">관리 링크로 접속됨</span></div>
+    <form method="post" action="{% url 'jobs:job_delete' posting.pk token %}" onsubmit="return confirm('이 공고를 삭제하시겠습니까? 삭제하면 지원 내역도 함께 삭제되며 되돌릴 수 없습니다.');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger btn-sm">공고 삭제</button>
+    </form>
+  </div>
+  <h1 class="h4 mb-1">{{ posting.manager.institution_name }} · {{ posting.title }}</h1>
+  <p class="text-secondary mb-4">지원자 {{ applications|length }}명 · {{ posting.get_employment_type_display }}</p>
+
+  {% if applications %}
+  <div class="card border-0 shadow-sm">
+    {% for application in applications %}
+    <div class="applicant-row">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-2">
+        <div class="fw-bold">{{ application.phone_masked }} <span class="text-secondary fw-normal small">· {{ application.applied_at|date:'n/j H:i' }} 지원 · {% if application.certification_verified %}자격증 확인됨{% else %}자격증 미확인{% endif %}</span></div>
+      </div>
+      {% if application.message %}
+      <p class="text-secondary small mb-0" style="white-space:pre-line">{{ application.message }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">아직 지원자가 없습니다.</div>
+  {% endif %}
+</div>
+{% endblock %}

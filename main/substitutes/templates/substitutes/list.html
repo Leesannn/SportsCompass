@@ -8,10 +8,14 @@
 
 <form method="get" class="card border-0 shadow-sm mb-4"><div class="card-body">
   <div class="row g-3 align-items-end">
+    <div class="col-12"><label class="form-label">키워드 검색</label><input type="text" name="q" class="form-control" placeholder="기관명, 종목, 지역, 주소, 상세내용으로 검색" value="{{ current.q }}"></div>
     <div class="col-md-3"><label class="form-label">종목</label><select name="sport" class="form-select"><option value="">전체</option>{% for sport in sport_options %}<option value="{{ sport.normalized_name }}" {% if current.sport == sport.normalized_name %}selected{% endif %}>{{ sport.name }}</option>{% endfor %}</select></div>
     <div class="col-md-3"><label class="form-label">지역</label><select name="region" class="form-select"><option value="">전체</option>{% for key, label in region_options %}<option value="{{ key }}" {% if current.region == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
     <div class="col-md-3"><label class="form-label">날짜</label><input type="date" name="date" class="form-control" value="{{ current.date }}"></div>
-    <div class="col-md-3 d-flex gap-2"><button class="btn btn-primary flex-fill">검색</button><a class="btn btn-outline-secondary" href="{% url 'substitutes:posting_list' %}">초기화</a></div>
+    <div class="col-md-3"><label class="form-label">정렬</label><select name="sort" class="form-select">{% for key, label in sort_options %}<option value="{{ key }}" {% if current.sort == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-3"><label class="form-label">최소 페이(원)</label><input type="number" name="pay_min" class="form-control" min="0" value="{{ current.pay_min }}"></div>
+    <div class="col-md-3"><label class="form-label">최대 페이(원)</label><input type="number" name="pay_max" class="form-control" min="0" value="{{ current.pay_max }}"></div>
+    <div class="col-md-6 d-flex gap-2"><button class="btn btn-primary flex-fill">검색</button><a class="btn btn-outline-secondary" href="{% url 'substitutes:posting_list' %}">초기화</a></div>
   </div>
 </div></form>
 

@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'analytics',
     'recommendations',
     'substitutes',
+    'jobs',
     'community',
 ]
 

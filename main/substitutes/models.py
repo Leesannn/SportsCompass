@@ -58,8 +58,8 @@ class CenterContact(models.Model):
 class Posting(models.Model):
     class Status(models.TextChoices):
         RECRUITING = 'recruiting', '모집중'
-        CLOSED = 'closed', '마감'
-        COMPLETED = 'completed', '완료'
+        CLOSED = 'closed', '모집중단'
+        COMPLETED = 'completed', '모집완료'
 
     class PayUnit(models.TextChoices):
         SESSION = 'session', '회당'

@@ -9,7 +9,7 @@ from django.utils import timezone
 from analytics.services.normalizers import normalize_region
 
 from . import selectors
-from .forms import ApplyForm, EvaluationForm, ManagerVerifyForm, PostingDeleteForm, PostingForm
+from .forms import ApplyForm, EvaluationForm, ManagerVerifyForm, PostingDeleteForm, PostingEditForm, PostingForm
 from .models import Application, CenterContact, PhoneIdentity, Posting, ReputationRecord
 from .services.certification import has_required_certification
 from .services.phone import hash_phone, mask_phone
@@ -48,6 +48,26 @@ def posting_delete_request(request, pk):
     else:
         form = PostingDeleteForm()
     return render(request, 'substitutes/delete_confirm.html', {'posting': posting, 'form': form})
+
+
+def posting_edit_request(request, pk):
+    posting = get_object_or_404(Posting.objects.select_related('manager', 'sport'), pk=pk)
+    if request.method == 'POST':
+        form = PostingEditForm(request.POST, instance=posting)
+        if form.is_valid():
+            phone_hash = hash_phone(form.cleaned_data['phone'])
+            password = form.cleaned_data['password']
+            if phone_hash != posting.manager.phone_hash or not check_password(password, posting.manager.password_hash):
+                form.add_error(None, '담당자 휴대폰 번호 또는 비밀번호가 일치하지 않습니다.')
+            else:
+                updated = form.save(commit=False)
+                updated.normalized_region = normalize_region(updated.region)
+                updated.save()
+                messages.success(request, '공고를 수정했습니다.')
+                return redirect('substitutes:posting_detail', pk=updated.pk)
+    else:
+        form = PostingEditForm(instance=posting)
+    return render(request, 'substitutes/edit.html', {'posting': posting, 'form': form})
 
 
 def application_apply(request, pk):

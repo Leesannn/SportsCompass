@@ -1,10 +1,20 @@
 from datetime import timedelta
 
+from django.db.models import Q
 from django.utils import timezone
 
 from analytics.models import CanonicalSport
 
 from .models import Posting, ReputationRecord
+
+
+SORT_OPTIONS = {
+    'latest': ('-created_at', '최신 등록순'),
+    'work_date': ('work_date', '근무일 임박순'),
+    'pay_desc': ('-pay_amount', '페이 높은순'),
+    'pay_asc': ('pay_amount', '페이 낮은순'),
+}
+DEFAULT_SORT = 'latest'
 
 
 RECENT_WINDOW_DAYS = 182  # 약 6개월
@@ -50,6 +60,10 @@ def apply_posting_filters(params):
     sport = params.get('sport', '').strip()
     region = params.get('region', '').strip()
     work_date = params.get('date', '').strip()
+    keyword = params.get('q', '').strip()
+    pay_min = params.get('pay_min', '').strip()
+    pay_max = params.get('pay_max', '').strip()
+    sort = params.get('sort', '').strip()
 
     if sport:
         postings = postings.filter(sport__normalized_name=sport)
@@ -57,7 +71,23 @@ def apply_posting_filters(params):
         postings = postings.filter(normalized_region=region)
     if work_date:
         postings = postings.filter(work_date=work_date)
-    return postings.order_by('-created_at')
+    if keyword:
+        # 공백으로 나눈 각 단어가 기관명/종목/지역/주소/상세설명 중 하나에는 포함되어야 한다 (AND of tokens, OR of fields).
+        for token in keyword.split():
+            postings = postings.filter(
+                Q(manager__institution_name__icontains=token)
+                | Q(sport__name__icontains=token)
+                | Q(region__icontains=token)
+                | Q(address__icontains=token)
+                | Q(description__icontains=token)
+            )
+    if pay_min.isdigit():
+        postings = postings.filter(pay_amount__gte=int(pay_min))
+    if pay_max.isdigit():
+        postings = postings.filter(pay_amount__lte=int(pay_max))
+
+    order_field, _ = SORT_OPTIONS.get(sort, SORT_OPTIONS[DEFAULT_SORT])
+    return postings.order_by(order_field, '-created_at')
 
 
 def filter_options():
@@ -66,4 +96,5 @@ def filter_options():
         'region_options': Posting.objects.exclude(normalized_region='').values_list(
             'normalized_region', 'region',
         ).distinct().order_by('region'),
+        'sort_options': [(key, label) for key, (_, label) in SORT_OPTIONS.items()],
     }

@@ -1,0 +1,13 @@
+{% extends 'analytics/base.html' %}
+{% block title %}공고 수정 | 단기 대타 구하기{% endblock %}
+{% block content %}
+<div class="recommend-shell form-shell">
+  <h1 class="text-center mb-1">공고 수정</h1>
+  <p class="text-secondary text-center mb-4">{{ posting.manager.institution_name }} · {{ posting.sport.name }} 대타 공고를 수정합니다.<br>공고 등록 시 입력한 담당자 휴대폰 번호와 비밀번호를 입력해 주세요.</p>
+  <form method="post" class="recommend-form" novalidate>
+    {% include 'substitutes/_form_fields.html' %}
+    <div class="form-actions"><button class="primary-action" type="submit">수정 내용 저장</button></div>
+  </form>
+  <p class="text-center mt-3"><a href="{% url 'substitutes:posting_detail' posting.pk %}">← 공고로 돌아가기</a></p>
+</div>
+{% endblock %}
