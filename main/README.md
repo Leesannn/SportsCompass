@@ -165,3 +165,26 @@ python manage.py clean_program_data --reference-date 2026-07-31
 정리 규칙은 `analytics/program_cleanup_rules.json`에서 관리합니다. 실행 후 `/current-programs/`에서
 원본명·정리명·운영 상태·제외 사유·판정 근거를 확인할 수 있고, `/demand-supply/`에서
 기존 정규화 지역과 자격증 집계값을 이용한 지역별 프로그램·자격증 비교를 볼 수 있습니다.
+
+## 고용24 일자리 공고 동기화
+
+일자리 공고는 센터가 직접 등록하지 않고 고용24의 스포츠·레크리에이션 공고를 수집해
+`community` PostgreSQL의 `jobs_externaljobposting` 테이블에 저장합니다. 마지막 수집 결과는
+같은 DB의 `jobs_work24fetchstatus`에서 관리합니다.
+
+```bash
+pip install -r requirements.txt
+python manage.py migrate --database=community
+python manage.py sync_work24_jobs
+```
+
+실행 전 `.env`에 `COMMUNITY_DB_NAME`, `COMMUNITY_DB_USER`, `COMMUNITY_DB_PASSWORD`,
+`COMMUNITY_DB_HOST`, `COMMUNITY_DB_PORT`를 설정해야 합니다. Windows에서 24시간 주기 작업을
+등록하려면 프로젝트의 `main` 폴더에서 다음 명령을 실행합니다.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\work24_job_sync_task.ps1 -Register
+```
+
+실행 로그는 `logs/work24_job_sync.log`에 기록됩니다. Render에서는 Windows 작업 스케줄러 대신
+Cron Job을 만들고 실행 명령을 `python manage.py sync_work24_jobs`로 설정합니다.

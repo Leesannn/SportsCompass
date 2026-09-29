@@ -1,12 +1,12 @@
 class Work24Router:
-    """워크넷(고용24) 크롤링 결과(jobs.ExternalJobPosting)만 PostgreSQL로 라우팅."""
+    """고용24 공고와 수집 상태를 PostgreSQL로 라우팅."""
 
     app_label = 'jobs'
-    model_name = 'externaljobposting'
+    model_names = {'externaljobposting', 'work24fetchstatus'}
     database = 'community'
 
     def _is_target(self, model):
-        return model._meta.app_label == self.app_label and model._meta.model_name == self.model_name
+        return model._meta.app_label == self.app_label and model._meta.model_name in self.model_names
 
     def db_for_read(self, model, **hints):
         if self._is_target(model):
@@ -25,10 +25,10 @@ class Work24Router:
         return None
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
-        if app_label == self.app_label and model_name == self.model_name:
+        if app_label == self.app_label and model_name in self.model_names:
             return db == self.database
         if db == self.database and app_label == self.app_label:
-            # jobs 앱의 나머지 모델(JobPosting 등)은 여전히 default(SQLite)에 남는다.
+            # jobs 앱에서 고용24 수집 모델 외의 테이블은 PostgreSQL에 만들지 않는다.
             return False
         return None
 
