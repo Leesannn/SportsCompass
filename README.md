@@ -35,15 +35,15 @@
 
 ### 팀명
 
-**오답삼형제**
+**나침**
 
 ### 팀원
 
 | 이름 | GitHub | 주요 담당 |
 |---|---|---|
-| Leesannn | [@Leesannn](https://github.com/Leesannn) | 서비스 통합, PostgreSQL·배포, 고용24 연동 |
-| HYM010219 | [@HYM010219](https://github.com/HYM010219) | 자격·시험 정보, 채용 기능, 화면 구성 |
-| ericsw2727 | [@ericsw2727](https://github.com/ericsw2727) | 공공데이터 정제, 분석 기능, 문서·UI 개선 |
+| 이종연 | [@Leesannn](https://github.com/Leesannn) | 서비스 통합, PostgreSQL·배포, 고용24 연동 |
+| 황유민 | [@HYM010219](https://github.com/HYM010219) | 자격·시험 정보, 채용 기능, 화면 구성 |
+| 유성원 | [@ericsw2727](https://github.com/ericsw2727) | 공공데이터 정제, 분석 기능, 문서·UI 개선 |
 
 ### 멤버 개인 GitHub 계정과 연동
 
@@ -700,6 +700,6 @@ python manage.py test analytics.tests.test_kspo_crawler analytics.tests.test_cle
 
 | 팀원 | 한 줄 회고 |
 |---|---|
-| Leesannn | 여러 기능을 하나의 서비스로 통합하면서 데이터 저장소와 장애 범위를 분리하는 설계의 중요성을 배웠다. |
-| HYM010219 | 자격과 채용 정보를 사용자 흐름에 연결하며 정확한 정보 구조와 이해하기 쉬운 화면이 함께 필요하다는 점을 배웠다. |
-| ericsw2727 | 공공데이터를 실제 추천과 분석에 사용하려면 정규화 기준과 결과의 근거를 사용자에게 보여주는 과정이 중요하다는 점을 배웠다. |
+| 이종연 | 향후 작성 예정 |
+| 황유민 | 향후 작성 예정 |
+| 유성원 | 향후 작성 예정 |
