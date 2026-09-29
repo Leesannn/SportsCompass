@@ -4,10 +4,12 @@ from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
 from django.db.models import Q
+from django.test import RequestFactory
 from django.test import SimpleTestCase
 
-from .selectors import EXTERNAL_RESULT_LIMIT, apply_external_job_filters
+from .selectors import apply_external_job_filters
 from .scheduler import due_exam_grade_codes, sync_is_due
+from .views import job_list
 
 
 KST = ZoneInfo('Asia/Seoul')
@@ -28,7 +30,7 @@ class ExternalJobFilterTests(SimpleTestCase):
             keyword_condition,
             Q(title__icontains='수영') | Q(company_name__icontains='수영'),
         )
-        postings.__getitem__.assert_called_once_with(slice(None, EXTERNAL_RESULT_LIMIT, None))
+        self.assertIs(apply_external_job_filters({'q': ''}), postings)
 
     @patch('jobs.selectors.ExternalJobPosting.objects.all')
     def test_region_filter_is_applied_separately(self, all_postings):
@@ -40,6 +42,22 @@ class ExternalJobFilterTests(SimpleTestCase):
         apply_external_job_filters({'q': '', 'region': '서울'})
 
         postings.filter.assert_called_once_with(region_text__icontains='서울')
+
+
+class ExternalJobPaginationTests(SimpleTestCase):
+    @patch('jobs.views.render')
+    @patch('jobs.views.selectors.apply_external_job_filters')
+    def test_all_results_are_available_across_pages(self, apply_filters, render):
+        apply_filters.return_value = list(range(45))
+        request = RequestFactory().get('/jobs/', {'page': '3', 'q': '수영', 'region': '서울'})
+
+        job_list(request)
+
+        context = render.call_args.args[2]
+        page_obj = context['page_obj']
+        self.assertEqual(page_obj.paginator.count, 45)
+        self.assertEqual(page_obj.paginator.num_pages, 3)
+        self.assertEqual(list(page_obj.object_list), list(range(40, 45)))
 
 
 class Work24SchedulerTests(SimpleTestCase):

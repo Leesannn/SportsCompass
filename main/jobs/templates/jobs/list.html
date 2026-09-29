@@ -16,12 +16,13 @@
 
 <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
   <h2 class="h5 mb-0">고용24 연계 공고</h2>
+  <span class="badge text-bg-light">총 {{ page_obj.paginator.count }}건</span>
   <span class="text-secondary small">클릭하면 고용24 원문 페이지로 이동합니다.</span>
 </div>
 
-{% if external_postings %}
+{% if page_obj.object_list %}
 <div class="d-flex flex-column gap-3">
-  {% for posting in external_postings %}
+  {% for posting in page_obj %}
   <a class="text-decoration-none text-reset" href="{{ posting.source_url }}" target="_blank" rel="noopener noreferrer">
     <div class="card border-0 shadow-sm"><div class="card-body">
       <div class="mb-1"><span class="badge text-bg-secondary">고용24</span> <span class="text-secondary small">{{ posting.fetched_at|date:'Y-m-d' }} 수집</span></div>
@@ -36,6 +37,7 @@
   </a>
   {% endfor %}
 </div>
+<div class="mt-4">{% include 'analytics/_pagination.html' %}</div>
 {% else %}
 <div class="empty-state">조건에 맞는 고용24 일자리 공고가 없습니다.</div>
 {% endif %}
