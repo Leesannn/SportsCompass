@@ -43,4 +43,27 @@
 {% else %}
 <div class="empty-state">조건에 맞는 일자리 공고가 없습니다.</div>
 {% endif %}
+
+{% if external_postings %}
+<div class="mt-5 mb-3 d-flex align-items-center gap-2">
+  <h2 class="h5 mb-0">워크넷 연계 공고</h2>
+  <span class="text-secondary small">출처: 고용24(워크넷) · 클릭하면 원문 페이지로 이동합니다</span>
+</div>
+<div class="d-flex flex-column gap-3">
+  {% for posting in external_postings %}
+  <a class="text-decoration-none text-reset" href="{{ posting.source_url }}" target="_blank" rel="noopener noreferrer">
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <div class="mb-1"><span class="badge text-bg-secondary">워크넷 연계</span> <span class="text-secondary small">{{ posting.fetched_at|date:'Y-m-d' }} 수집</span></div>
+      <h2 class="h5 mb-2">{{ posting.company_name }} · {{ posting.title }}</h2>
+      <div class="d-flex flex-wrap gap-3 text-secondary small">
+        <span>{{ posting.region_text|default:'지역 정보 없음' }}</span>
+        <span class="text-primary fw-bold">{{ posting.pay_text|default:'급여 협의' }}</span>
+        <span>{{ posting.career_text|default:'경력무관' }}</span>
+        <span>{{ posting.period_text }}</span>
+      </div>
+    </div></div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
 {% endblock %}

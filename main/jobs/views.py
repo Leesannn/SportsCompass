@@ -22,8 +22,9 @@ MANAGER_SESSION_KEY = 'jobs_manager_phone_hash'
 def job_list(request):
     postings = selectors.apply_job_filters(request.GET)
     page_obj = Paginator(postings, 20).get_page(request.GET.get('page'))
+    external_postings = selectors.apply_external_job_filters(request.GET)
     context = selectors.filter_options()
-    context.update({'page_obj': page_obj, 'current': request.GET})
+    context.update({'page_obj': page_obj, 'external_postings': external_postings, 'current': request.GET})
     return render(request, 'jobs/list.html', context)
 
 

@@ -1,8 +1,11 @@
+from django.db import DatabaseError
 from django.db.models import F, Q
 
 from analytics.models import CanonicalSport
 
-from .models import JobPosting
+from .models import ExternalJobPosting, JobPosting
+
+EXTERNAL_RESULT_LIMIT = 20
 
 
 SORT_LABELS = {
@@ -58,6 +61,32 @@ def apply_job_filters(params):
         postings = postings.filter(pay_amount__lte=int(pay_max))
 
     return _order_by(postings, sort)
+
+
+def apply_external_job_filters(params):
+    """워크넷 연계 공고는 구조화된 종목/고용형태/급여 필드가 없어 해당 필터가 걸려 있으면 제외한다.
+
+    ExternalJobPosting은 별도 PostgreSQL 접속(community)을 쓰므로, 그 DB가 잠시
+    응답하지 않더라도 부가 기능인 이 섹션만 비워지고 나머지 페이지(내부 공고 검색)는
+    정상 동작해야 한다. 그래서 여기서 즉시 평가하고 DB 오류를 흡수한다.
+    """
+    structured_filters_active = any(
+        params.get(key, '').strip() for key in ('sport', 'employment_type', 'pay_min', 'pay_max')
+    )
+    if structured_filters_active:
+        return []
+
+    postings = ExternalJobPosting.objects.all()
+    keyword = params.get('q', '').strip()
+    if keyword:
+        for token in keyword.split():
+            postings = postings.filter(
+                Q(title__icontains=token) | Q(company_name__icontains=token) | Q(region_text__icontains=token)
+            )
+    try:
+        return list(postings[:EXTERNAL_RESULT_LIMIT])
+    except DatabaseError:
+        return []
 
 
 def filter_options():

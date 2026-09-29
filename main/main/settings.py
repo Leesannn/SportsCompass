@@ -108,10 +108,13 @@ DATABASES = {
         'PASSWORD': os.environ.get('COMMUNITY_DB_PASSWORD', ''),
         'HOST': os.environ.get('COMMUNITY_DB_HOST', '127.0.0.1'),
         'PORT': os.environ.get('COMMUNITY_DB_PORT', '5432'),
+        # 이 DB가 응답하지 않아도(예: 워크넷 연계 공고 조회) 요청이 오래 멈춰있지 않도록 연결 자체에 제한을 둔다.
+        'OPTIONS': {'connect_timeout': 5},
     },
 }
 
 DATABASE_ROUTERS = [
+    'main.db_routers.Work24Router',
     'main.db_routers.CommunityRouter',
 ]
 
