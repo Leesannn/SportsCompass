@@ -179,12 +179,20 @@ python manage.py sync_work24_jobs
 ```
 
 실행 전 `.env`에 `COMMUNITY_DB_NAME`, `COMMUNITY_DB_USER`, `COMMUNITY_DB_PASSWORD`,
-`COMMUNITY_DB_HOST`, `COMMUNITY_DB_PORT`를 설정해야 합니다. Windows에서 24시간 주기 작업을
-등록하려면 프로젝트의 `main` 폴더에서 다음 명령을 실행합니다.
+`COMMUNITY_DB_HOST`, `COMMUNITY_DB_PORT`를 설정해야 합니다.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\work24_job_sync_task.ps1 -Register
+Render에서는 별도 Cron Job 대신 웹 서비스의 Gunicorn worker에서 APScheduler를 실행합니다.
+웹 서비스의 환경 변수에 `ENABLE_APSCHEDULER=true`를 추가하고 Start Command를 다음처럼
+설정합니다.
+
+```bash
+gunicorn -c gunicorn.conf.py main.wsgi:application
 ```
 
-실행 로그는 `logs/work24_job_sync.log`에 기록됩니다. Render에서는 Windows 작업 스케줄러 대신
-Cron Job을 만들고 실행 명령을 `python manage.py sync_work24_jobs`로 설정합니다.
+고용24 공고는 한국 시간 오전 3시에, 시험 일정은 자정과 정오에 동기화합니다. 무료 인스턴스가
+잠들어 해당 시각을 놓친 경우에는 다음 웹 요청으로 서버가 깨어난 뒤 수집 여부를 확인해 보충 실행합니다.
+PostgreSQL advisory lock과 수집 상태를 함께 확인하므로 여러 Gunicorn worker가 있어도 같은 수집
+구간에 중복 실행하지 않습니다.
+
+운영 환경과 로컬 모두 Windows 작업 스케줄러를 사용하지 않으며 Render 웹 서비스의
+APScheduler만 사용합니다.

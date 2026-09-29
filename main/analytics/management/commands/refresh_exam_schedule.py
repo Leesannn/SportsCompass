@@ -11,7 +11,7 @@ from analytics.services.kspo_schedule import fetch_schedule
 class Command(BaseCommand):
     help = (
         '체육지도자 자격검정 사이트(sqms.kspo.or.kr)의 연간일정계획을 갱신해 캐시(DB)에 '
-        '저장합니다. 일정 주기(예: 1시간)로 실행하도록 스케줄러(cron/작업 스케줄러)에 등록하세요.'
+        '저장합니다. 운영 환경에서는 APScheduler가 주기적으로 실행합니다.'
     )
 
     def add_arguments(self, parser):
