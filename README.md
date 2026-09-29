@@ -1,202 +1,456 @@
-# 나침 - 스포츠 커리어 나침반
+<p align="center">
+  <img src="main/analytics/static/analytics/images/nachim-logo.png" alt="나침 로고" width="220" />
+</p>
 
-> 체육 공공데이터를 자동으로 수집·전처리·적재하고, 예비·현직 체육지도자의 진로 탐색과 활동 기회 연결을 돕는 데이터 서비스
+<h1 align="center">나침</h1>
 
-[![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Django](https://img.shields.io/badge/Django-6.1-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-community_DB-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![SQLite](https://img.shields.io/badge/SQLite-analysis_DB-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+<p align="center">
+  스포츠 경험을 자격, 활동 기관, 일자리와 연결하는 체육지도자 커리어 플랫폼
+</p>
 
-- 저장소: [github.com/Leesannn/Noanswer3Brothers](https://github.com/Leesannn/Noanswer3Brothers)
-- 권장 환경: Python 3.13
-- 기준 시간대: Asia/Seoul
-- 데이터 스냅샷 기준일: 2026-07-31
+<p align="center">
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.13-3776AB?logo=python&amp;logoColor=white" alt="Python 3.13" /></a>
+  <a href="https://www.djangoproject.com/"><img src="https://img.shields.io/badge/Django-6.1-092E20?logo=django&amp;logoColor=white" alt="Django 6.1" /></a>
+  <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-community_DB-4169E1?logo=postgresql&amp;logoColor=white" alt="PostgreSQL" /></a>
+  <a href="https://www.sqlite.org/"><img src="https://img.shields.io/badge/SQLite-analysis_DB-003B57?logo=sqlite&amp;logoColor=white" alt="SQLite" /></a>
+</p>
 
-## 평가 대상 범위
+## 나침이란?
 
-이번 단위 프로젝트의 평가 대상은 기존 웹 서비스 화면이 아니라 다음 **데이터 파이프라인 구현**입니다.
+**나침**은 스포츠 분야에서 다음 진로를 찾는 사람에게 방향을 제시하는 커리어 나침반입니다.
 
-1. 국민체육진흥공단 체육지도자 자격·시험 일정 수집
-2. 고용24 스포츠·레크리에이션 채용공고 수집
-3. 공공데이터 CSV의 검증·정규화·중복 제거·종목 매칭
-4. SQLite·PostgreSQL 적재 및 적재 건수 검증
-5. APScheduler 기반 정기 실행, 누락 보충, 중복 실행 방지
-6. 오류·빈 결과·사이트 구조 변경 시 기존 데이터 보존
+관심 종목은 있지만 어떤 자격을 준비해야 할지 모르는 사람에게는 **자격 취득 방향**을, 이미 자격을 가진 지도자에게는 **활동할 기관과 프로그램**을 추천합니다. 이후 시험 준비, 지역 현황 분석, 일자리 탐색, 대타 강사 지원, 동료와의 정보 교류까지 하나의 서비스 안에서 이어집니다.
 
-맞춤 추천, 대시보드, 대타 모집, 커뮤니티 등 웹 서비스 기능은 파이프라인 결과를 확인하는 시연 화면으로 활용합니다.
-
-## 평가용 핵심 요약
-
-| 확인 항목 | 내용 | 근거 위치 |
-|---|---|---|
-| 수집 | KSPO 자격제도·시험 일정, 고용24 직종 코드 059 공고 | analytics/services/kspo_*.py, jobs/services/work24_*.py |
-| 전처리 | 인코딩 감지, NFKC·공백·지역명 정규화, 필수 컬럼·날짜·정원 검증, 결정론적 종목 매칭 | analytics/services/clean_database_builder.py |
-| 적재 | 분석 데이터는 SQLite, 고용24 공고·수집 상태는 PostgreSQL | main/settings.py, main/db_routers.py |
-| 스케줄 | 고용24 매일 03:00, 시험 일정 매일 00:00·12:00 | jobs/scheduler.py |
-| 로그 | 로컬 콘솔 또는 Render Logs, 마지막 성공·실패는 상태 테이블에 저장 | Work24FetchStatus, ExamScheduleFetchStatus |
-| 장애 대응 | 요청 실패·0건·급격한 건수 감소 시 기존 데이터 유지 | sync_work24_jobs, refresh_exam_schedule |
-| 중복 방지 | 고유 제약, 원본 키, PostgreSQL advisory lock, max_instances=1 | 모델·스케줄러 코드 |
-| 검증 결과 | 파이프라인 핵심 테스트 30건 통과 | 아래 검증 절 참고 |
-
-### 현재 적재 결과
-
-2026-09-29 로컬 스냅샷과 생성 산출물을 직접 집계한 값입니다.
-
-| 데이터 | 적재·생성 건수 | 비고 |
-|---|---:|---|
-| 기준 스포츠 종목 | 113개 | CanonicalSport |
-| 자격 취득 집계 | 17,467건 | QualificationAggregate |
-| 기관 | 376개 | Institution |
-| 프로그램 | 204,461건 | Program |
-| 프로그램 정리 결과 | 204,461건 | 원본 프로그램과 1:1 |
-| 운영 중·분석 가능 프로그램 | 9,377건 | 기준일 2026-07-31 |
-| 운영 종료 프로그램 | 176,619건 | 분석 대상 제외 |
-| 운영 예정 프로그램 | 18,465건 | 분석 대상 제외 |
-| 자격등급 요약 | 9건 | data/kspo_license_grades.csv |
-| 응시자격 경로 | 48건 | data/kspo_license_eligibility_paths.csv |
-| 시험 일정 | 388건 | 9개 자격등급, ExamSchedule |
-| 고용24 채용공고 | 934건 | 개발 확인 기준, 운영 DB의 last_success_count로 최종 확인 |
-
-고용24 운영 DB는 외부 PostgreSQL이므로 제출 시점의 최종 건수는 관리자 화면의 **외부 채용정보 갱신 상태** 또는 Work24FetchStatus.last_success_count를 기준으로 확인합니다.
+~~~mermaid
+flowchart LR
+    A[관심 종목·지역 입력] --> B[맞춤 진로 추천]
+    B --> C{관련 자격 보유}
+    C -->|미보유| D[자격·시험 준비]
+    D --> E[활동 기관 탐색]
+    C -->|보유| E
+    E --> F[일자리·대타 활동]
+    F --> G[경력과 평판 축적]
+    G --> H[커뮤니티 정보 공유]
+    H --> B
+~~~
 
 ## 목차
 
-1. [팀 소개](#1-팀-소개)
-2. [프로젝트 개요](#2-프로젝트-개요)
-3. [기술 스택](#3-기술-스택)
-4. [WBS](#4-wbs)
-5. [요구사항 명세서](#5-요구사항-명세서)
-6. [ERD](#6-erd)
-7. [주요 프로시저](#7-주요-프로시저)
-8. [수행 결과](#8-수행-결과)
-9. [한 줄 회고](#9-한-줄-회고)
+1. [팀 소개](#team)
+2. [프로젝트 개요](#overview)
+3. [주요 기능](#features)
+4. [사용자별 이용 흐름](#user-flow)
+5. [맞춤 추천 기준](#recommendation)
+6. [기술 스택과 아키텍처](#technology)
+7. [데이터 구조](#data)
+8. [실행 방법](#run)
+9. [데이터 수집과 운영](#pipeline)
+10. [테스트와 현재 제약사항](#quality)
+- [프로젝트 구조와 출처](#appendix)
+
+---
+
+<a id="team"></a>
 
 ## 1. 팀 소개
 
-### 오답삼형제
+**팀명: 오답삼형제**
 
-| 팀원 | GitHub | 커밋 기준 주요 기여 |
+| 팀원 | GitHub | 주요 담당 |
 |---|---|---|
-| Leesannn | [@Leesannn](https://github.com/Leesannn) | 서비스 통합, PostgreSQL·배포 구성, 고용24 수집·APScheduler |
-| HYM010219 | [@HYM010219](https://github.com/HYM010219) | KSPO 자격정보, 고용24 검색·수집, UI·시연 데이터 |
-| ericsw2727 | [@ericsw2727](https://github.com/ericsw2727) | 공공데이터 정제·구조 개편, 분석 화면, 문서·UI 개선 |
+| Leesannn | [@Leesannn](https://github.com/Leesannn) | 서비스 통합, PostgreSQL·배포, 고용24 연동 |
+| HYM010219 | [@HYM010219](https://github.com/HYM010219) | 자격·시험 정보, 채용 기능, 화면 구성 |
+| ericsw2727 | [@ericsw2727](https://github.com/ericsw2727) | 공공데이터 정제, 분석 기능, 문서·UI 개선 |
 
-역할 표는 저장소 커밋 이력을 기준으로 요약했습니다.
+<a id="overview"></a>
 
 ## 2. 프로젝트 개요
 
-### 프로젝트명
+### 해결하려는 문제
 
-**나침 - 스포츠 커리어 나침반**
+체육지도자를 준비하거나 활동 중인 사용자는 자격제도, 시험 일정, 지역 프로그램, 채용공고를 서로 다른 사이트에서 찾아야 합니다. 자격을 취득한 뒤에도 어떤 기관에서 자신의 종목을 운영하는지, 어느 지역에 기회가 있는지 파악하기 어렵습니다.
 
-- 프로젝트 주제: **자동 학습 데이터 파이프라인 구축**
-- 세부 주제: **체육 공공데이터 기반 자동 수집·전처리·적재 파이프라인**
+기관 역시 갑작스러운 강사 공백이 생겼을 때 자격과 활동 이력을 확인하면서 빠르게 대타를 구할 수단이 부족합니다.
 
-### 프로젝트 소개
+나침은 다음 정보를 하나의 흐름으로 연결합니다.
 
-스포츠 프로그램, 체육지도자 자격 취득 현황, 시험 일정, 채용공고처럼 서로 흩어진 데이터를 하나의 파이프라인으로 수집·정리합니다. 정리된 데이터는 지도자의 자격 취득 방향과 활동 기관 탐색, 지역별 프로그램·지도자 현황 비교에 사용합니다.
+- 체육지도자 자격 종류와 시험 일정
+- 종목·지역별 프로그램과 운영 기관
+- 자격 취득 현황과 프로그램 공급 비교
+- 고용24 스포츠 채용공고
+- 단기 대타 강사 모집과 지원
+- 시험·자격·현장 경험을 나누는 커뮤니티
 
-### 필요성
+### 핵심 사용자
 
-- 체육 프로그램·자격·채용 정보가 여러 기관과 사이트에 분산되어 있습니다.
-- 사이트별 형식과 지역·종목 표현이 달라 그대로 비교하기 어렵습니다.
-- 외부 사이트 장애나 구조 변경이 서비스 데이터 전체를 비우지 않도록 안전한 갱신 방식이 필요합니다.
-- 수동 갱신은 누락 가능성이 있어 정기 실행과 실행 상태 기록이 필요합니다.
-
-### 목표
-
-1. 공개된 체육 데이터를 반복 가능한 방식으로 자동 수집합니다.
-2. 결측·중복·형식 오류를 검증하고 종목·지역 표현을 표준화합니다.
-3. 검증을 통과한 데이터만 저장소에 적재합니다.
-4. 수집 실패 시 기존 데이터를 보존하고 실패 원인을 기록합니다.
-5. 정해진 시간에 실행하고, 서버 휴면으로 놓친 작업은 자동 보충합니다.
-6. 웹 서비스와 분리된 관리 명령으로 독립 실행·검증할 수 있게 합니다.
-
-### 데이터 출처
-
-| 출처 | 수집 대상 | 수집 방식 | 저장 위치 |
-|---|---|---|---|
-| 국민체육진흥공단 체육지도자 자격검정 | 9개 등급 자격 정의·응시요건·시험 과목·기관 | requests + BeautifulSoup | CSV·TXT |
-| 국민체육진흥공단 체육지도자 자격검정 | 9개 등급 연간 시험 일정 | requests + BeautifulSoup | SQLite ExamSchedule |
-| 고용24 | 스포츠·레크리에이션 직종 공고 | 세션 기반 GET·POST 페이지네이션 + BeautifulSoup | PostgreSQL ExternalJobPosting |
-| 체육 공공데이터 CSV | 자격 취득 집계·시설 프로그램 | 스트리밍 CSV 전처리 | 정제 SQLite·서비스 SQLite |
-
-수집기는 브라우저 자동화에 의존하지 않습니다. 서버가 반환한 HTML을 파싱하므로 배포 환경에서도 동일하게 실행할 수 있습니다.
-
-## 3. 기술 스택
-
-| 구분 | 기술 | 사용 목적 |
+| 사용자 | 필요한 정보 | 나침이 제공하는 기능 |
 |---|---|---|
-| 언어 | Python 3.13 | 수집·전처리·적재·웹 서비스 |
-| 웹 프레임워크 | Django 6.1.1 | ORM, 관리 명령, 관리자, 서비스 화면 |
-| 수집 | requests 2.32.3 | 세션·타임아웃을 적용한 HTTP 요청 |
-| 파싱 | BeautifulSoup 4.12.3 | KSPO·고용24 HTML 파싱 |
-| 데이터 처리 | Python csv, pandas 3.0.5, openpyxl 3.1.5 | CSV·XLSX 입력과 검증 |
-| 스케줄링 | APScheduler 3.x | Cron·보충 작업 실행 |
-| 데이터베이스 | SQLite, PostgreSQL | 분석 데이터와 외부 공고 분리 저장 |
-| 운영 | Gunicorn, Render, WhiteNoise | 웹 서비스 실행·로그·정적 파일 제공 |
-| UI | Django Templates, Bootstrap, Chart.js | 결과 조회·시연 |
-| 테스트 | Django TestCase, unittest.mock | 파서·정제·저장·예외 흐름 검증 |
+| 체육지도자 입문자 | 어떤 자격과 종목을 준비할지 | 관심 종목 기반 자격 방향 추천, 시험 정보, AI 교재 추천 |
+| 자격 보유 지도자 | 어디에서 활동할 수 있을지 | 조건 기반 기관 추천, 프로그램·기관 상세, 채용공고 |
+| 현직·프리랜서 강사 | 단기·상시 활동 기회 | 고용24 일자리 검색, 대타 공고 검색·지원 |
+| 체육기관 담당자 | 프로그램 현황과 강사 수급 | 지역 분석, 대타 공고 등록, 신청자 관리·평가 |
+| 자격 준비생·동료 지도자 | 실제 정보와 자료 공유 | 시험정보·자료실·Q&A·자유게시판 |
 
-## 4. WBS
+### 서비스가 연결하는 데이터
 
-| 단계 | 작업 | 주요 산출물 | 상태 |
-|---|---|---|---|
-| 1. 요구 분석 | 출처·갱신 주기·저장 항목·실패 정책 정의 | 요구사항, 데이터 항목표 | 완료 |
-| 2. 수집 설계 | KSPO 등급 URL, 고용24 직종 코드·페이지 흐름 분석 | 수집 모듈 설계 | 완료 |
-| 3. 수집 구현 | 세션, 타임아웃, 요청 간격, 페이지네이션 구현 | kspo_*.py, work24_*.py | 완료 |
-| 4. 전처리 구현 | 인코딩·필수 컬럼·날짜·정원 검증, 정규화 | clean_database_builder.py | 완료 |
-| 5. 품질 관리 | 미매칭·오류 CSV, 중복·무결성 검사 | unmatched_programs.csv, invalid_rows.csv | 완료 |
-| 6. 적재 구현 | 임시 DB 생성 후 교체, DB 라우팅, 트랜잭션 | SQLite·PostgreSQL 모델 | 완료 |
-| 7. 자동화 | Cron 작업, 보충 실행, advisory lock | jobs/scheduler.py | 완료 |
-| 8. 검증 | 파서·정제·장애 시나리오 테스트 | 테스트 코드·실행 로그 | 완료 |
-| 9. 시연 | 관리자 상태, 시험 정보, 일자리 목록에서 결과 확인 | 서비스 화면 | 완료 |
+| 데이터 | 서비스 활용 |
+|---|---|
+| 체육 프로그램 | 운영 기관 추천, 프로그램 탐색, 지역별 공급 분석 |
+| 자격 취득 집계 | 종목별 지도자 현황, 자격 방향 추천, 수요·공급 비교 |
+| KSPO 자격·시험 정보 | 응시요건, 시험 과목, 일정, 결격사유 안내 |
+| 프로그램 신청 현황 | 추천 점수, 신청률 분석, 증설·개선 판단 참고 |
+| 고용24 채용공고 | 스포츠 일자리 검색과 원문 연결 |
+| 대타 공고·평판 | 단기 강사 연결, 신청 이력과 현장 평가 |
+| 게시글·댓글 | 시험·자격·현장 정보 교류 |
 
-## 5. 요구사항 명세서
+<a id="features"></a>
 
-### 기능 요구사항
+## 3. 주요 기능
 
-| ID | 요구사항 | 구현 |
+### 3-1. 맞춤 진로 추천
+
+서비스 첫 화면에서 자격 보유 상태에 맞는 경로를 선택합니다.
+
+#### 자격이 없는 사용자
+
+거주·활동 희망 지역, 주요 관심 종목, 추가 관심 종목, 운동 경험, 지도 대상, 활동 시간대를 입력합니다.
+
+추천 결과는 다음 내용을 제공합니다.
+
+- 취득을 고려할 종목 최대 5개
+- 종목별 100점 기준 적합도와 세부 점수
+- 관심 종목·지역·신청률·공급 부족도를 반영한 추천 이유
+- 연결 가능한 자격 종류와 등급
+- 자격 취득 후 살펴볼 기관
+- 지역 데이터가 부족할 때 전국 데이터로 보완했다는 안내
+- 신청 현황에 합성 데이터가 포함됐는지 여부
+
+종목 상세 화면에서는 연결된 자격 정보와 실제 활동을 살펴볼 기관을 함께 확인할 수 있습니다.
+
+#### 자격을 보유한 사용자
+
+보유 자격 종류, 지도 종목, 활동 지역, 세부 지역, 이동 가능 범위, 희망 지도 대상, 요일, 시간대를 입력합니다.
+
+추천 결과는 다음 기준으로 활동 기관 최대 5곳을 보여줍니다.
+
+- 선택 종목과 기관 프로그램의 일치 정도
+- 시·도 또는 시·군·구 일치 여부
+- 희망 지도 대상과 프로그램 대상의 일치 여부
+- 최근 프로그램 평균 신청률
+- 대기자 발생 여부
+- 활동 가능한 요일과 운영 요일
+- 선호 시간대와 프로그램 운영 시간
+
+각 결과에서 총점뿐 아니라 **왜 추천됐는지**, **어떤 데이터가 부족한지**를 함께 표시합니다.
+
+### 3-2. 자격증·시험 정보
+
+9개 체육지도자 자격등급을 선택해 다음 정보를 확인합니다.
+
+- 자격 정의와 관련 근거
+- 응시자격 과정과 제출서류
+- 필기시험 과목
+- 실기·구술 종목
+- 검정기관과 연수기관
+- 합격 기준과 결격사유
+- 필기, 실기·구술, 연수, 최종 발표 일정
+- 시험 일정의 마지막 갱신 상태
+
+### 3-3. AI 추천 교재
+
+시험정보 화면에서 선택한 자격과 필기 과목을 기준으로 Gemini가 교재를 추천합니다.
+
+- 가장 적합한 교재 1권과 대안 교재 목록
+- 추천 이유와 저자 정보
+- 온라인 서점 검색 링크
+- 새 추천 요청을 위한 캐시 갱신
+- IP 기준 분당 요청 제한
+- API 오류 시 시험정보 화면과 분리된 오류 처리
+
+<code>GEMINI_API_KEY</code>가 설정된 환경에서 사용할 수 있습니다.
+
+### 3-4. 통합 데이터 대시보드
+
+지역, 종목, 기관, 지도 대상, 프로그램 상태, 검색어 조건을 조합하여 체육 데이터를 탐색합니다.
+
+- 자격 취득, 프로그램, 기관, 신청 관련 핵심 지표
+- 최신 기준월의 정원·신청·대기 현황
+- 프로그램별 최근 6개월 평균 신청률
+- 신청률에 따른 증설·유지·개선 검토 안내
+- 실제 신청 데이터가 없을 때 시연용 데이터 사용 여부 표시
+
+### 3-5. 지도자 자격 취득 현황
+
+연도·지역·종목 조건으로 체육지도자 자격 취득 현황을 분석합니다.
+
+- 전체 취득 건수
+- 집계된 종목·지역·자격 종류 수
+- 종목별 취득 건수 상위 20개
+- 연도별 취득 추이
+- 자격 종류·등급별 현황
+- 지역별 현황
+- 정렬과 페이지네이션을 적용한 원본 집계표
+
+### 3-6. 프로그램·기관 탐색
+
+정제된 공공체육 프로그램을 검색하고 현재 운영 여부와 분석 사용 가능 여부를 확인합니다.
+
+- 운영 중·예정·종료 프로그램 구분
+- 프로그램명, 종목, 기관, 지역, 대상 검색
+- 종목 매칭 결과와 정제 근거 확인
+- 제외된 프로그램의 제외 사유 확인
+- 기관별 운영 프로그램 목록
+- 기관의 정원·신청·신청률 집계
+- 유지·개선·증설 검토 프로그램 분류
+- 해당 지역에서 새로 살펴볼 종목 기회
+- Kakao Maps 기반 기관 위치 확인
+
+### 3-7. 프로그램 신청 현황
+
+프로그램별 정원, 신청 인원, 대기 인원과 신청률을 확인합니다.
+
+- 신청률 상위·하위 프로그램
+- 정원 마감 프로그램
+- 종목별 평균 신청률
+- 기관별 평균 신청률
+- 프로그램명·정원·신청 인원 기준 정렬
+- 실제 데이터와 시뮬레이션 데이터를 명확히 구분
+
+### 3-8. 지역별 수요·공급 분석
+
+지역·종목별 운영 프로그램과 자격 취득 현황을 나란히 비교합니다.
+
+- 지역별 운영 프로그램 수
+- 종목별 자격 취득 건수
+- 전체 정원·신청 인원과 평균 신청률
+- 프로그램 수 대비 자격 취득 규모
+- 데이터 근거를 함께 표시하는 규칙 기반 진단
+
+분석 결과는 미래 수요 예측이 아니라 현재 적재된 데이터의 비교 지표입니다.
+
+### 3-9. 고용24 스포츠 일자리
+
+고용24의 스포츠·레크리에이션 직종 채용공고를 서비스에서 검색합니다.
+
+- 채용 제목과 기관명 키워드 검색
+- 지역 검색
+- 20개 단위 페이지네이션
+- 공고 제목, 회사, 지역, 고용형태, 마감일 확인
+- 고용24 원문 공고 연결
+- 외부 PostgreSQL 장애 시 빈 목록으로 안전하게 처리
+
+### 3-10. 대타 강사 모집
+
+체육기관의 갑작스러운 강사 공백과 프리랜서 지도자의 단기 활동 기회를 연결합니다.
+
+#### 강사
+
+- 종목·지역·근무일·급여 범위·키워드 검색
+- 최신순, 근무일 임박순, 급여순 정렬
+- 근무 날짜와 시간, 장소, 급여, 필요 자격 확인
+- 이름·휴대폰 번호·비밀번호로 지원
+- 같은 공고에 중복 지원 방지
+- 마감 공고 지원 차단
+
+#### 기관 담당자
+
+- 휴대폰 번호와 비밀번호로 담당자 확인
+- 기관명과 사업자등록번호 저장
+- 종목, 날짜, 시간, 장소, 필요 자격, 급여, 인원을 포함한 공고 등록
+- 등록 시 발급되는 관리 링크로 신청자 확인
+- 공고 상태 변경·수정·삭제
+- 신청자별 현장 평가 등록
+
+#### 평판과 개인정보 보호
+
+- 원문 전화번호는 저장하지 않고 해시와 마스킹 값만 보관
+- 노쇼, 컴플레인, 성실함, 시간엄수, 전문성, 친절함 기록
+- 최근 6개월, 6개월~1년, 1년 이상으로 평판 기간 구분
+- 활동 기록 3건 미만은 신규 사용자로 표시
+- 관리자만 허위·오류 기록을 사유와 함께 숨김 처리
+
+> 현재 대타 지원의 자격증 보유 확인은 실제 회원·자격 DB 연동 전 단계의 모의 구현입니다.
+
+### 3-11. 커뮤니티
+
+회원가입 없이 닉네임과 비밀번호로 글과 댓글을 작성합니다.
+
+- 자유게시판
+- 시험정보 공유
+- 기출문제·자료실
+- 자격증 Q&A
+- 게시글 목록·상세·조회수
+- 댓글 작성과 삭제
+- 작성 비밀번호를 이용한 글 수정·삭제
+- 관리자 공지 상단 고정
+
+비밀번호는 평문으로 저장하지 않고 Django 비밀번호 해시를 사용합니다.
+
+### 3-12. 멘토링
+
+커뮤니티 메뉴에 멘토링 진입 화면이 준비되어 있으며 현재는 출시 예정 기능으로 안내됩니다.
+
+<a id="user-flow"></a>
+
+## 4. 사용자별 이용 흐름
+
+### 자격을 준비하는 사용자
+
+~~~mermaid
+flowchart LR
+    A[관심 종목·지역 선택] --> B[자격 방향 추천]
+    B --> C[종목 상세·연결 자격 확인]
+    C --> D[응시요건·시험 일정 확인]
+    D --> E[AI 교재 추천]
+    E --> F[커뮤니티 자료·Q&A]
+    F --> G[자격 취득 후 기관 탐색]
+~~~
+
+### 자격을 보유한 지도자
+
+~~~mermaid
+flowchart LR
+    A[자격·종목·활동 조건 입력] --> B[기관 추천]
+    B --> C[기관 프로그램·위치 확인]
+    C --> D{활동 형태}
+    D -->|상시| E[고용24 일자리]
+    D -->|단기| F[대타 강사 공고]
+    E --> G[현장 활동]
+    F --> G
+    G --> H[경력·평판 축적]
+~~~
+
+### 체육기관 담당자
+
+~~~mermaid
+flowchart LR
+    A[대시보드·지역 분석] --> B[프로그램 운영 판단]
+    B --> C[강사 공백 발생]
+    C --> D[대타 공고 등록]
+    D --> E[신청자 확인]
+    E --> F[강사 선정·활동]
+    F --> G[평판 기록]
+~~~
+
+<a id="recommendation"></a>
+
+## 5. 맞춤 추천 기준
+
+나침의 추천은 사용자가 결과를 이해할 수 있도록 규칙 기반 점수와 근거를 함께 제공합니다.
+
+### 활동 기관 추천
+
+| 평가 요소 | 최대 점수 | 기준 |
+|---|---:|---|
+| 종목 일치 | 40점 | 정확 일치 또는 정규화된 유사 종목 |
+| 지역 일치 | 25점 | 시·군·구, 시·도, 지역 무관 범위 |
+| 지도 대상 일치 | 10점 | 유아·아동, 청소년, 성인, 어르신, 장애인 |
+| 최근 평균 신청률 | 15점 | 최근 프로그램 신청률 구간 |
+| 대기자 발생 | 10점 | 최근 대기 인원 발생 여부 |
+
+요일과 시간대는 추천 이유에 추가로 표시합니다. 데이터가 없는 항목은 점수를 추정하지 않고 부족한 데이터로 안내합니다.
+
+### 자격 방향 추천
+
+| 평가 요소 | 최대 점수 | 기준 |
+|---|---:|---|
+| 관심 종목 일치 | 35점 | 주요·추가 관심 종목 |
+| 지역 일치 | 20점 | 희망 지역 내 운영 프로그램 |
+| 지역 평균 신청률 | 20점 | 분석 대상 프로그램의 최근 신청률 |
+| 프로그램 공급 부족도 | 15점 | 지역 또는 전국 중앙값과 공급 규모 비교 |
+| 지도 대상 일치 | 10점 | 희망 대상 프로그램 존재 여부 |
+
+지역 자료가 없으면 전국 데이터를 사용하고 그 사실을 결과에 표시합니다. 동점일 때는 관심 종목, 지역, 신청률, 종목명 순으로 정렬하여 같은 입력에 같은 결과를 제공합니다.
+
+<a id="technology"></a>
+
+## 6. 기술 스택과 아키텍처
+
+### 기술 스택
+
+| 영역 | 기술 | 역할 |
 |---|---|---|
-| DP-01 | KSPO의 9개 자격등급 정보를 수집해야 한다. | crawl_license_info |
-| DP-02 | KSPO 연간 시험 일정을 등급별로 수집해야 한다. | refresh_exam_schedule |
-| DP-03 | 고용24 스포츠·레크리에이션 공고 전체를 페이지 단위로 수집해야 한다. | sync_work24_jobs |
-| DP-04 | HTTP 요청에 User-Agent, 지연, 타임아웃을 적용해야 한다. | kspo_client.py, work24_client.py |
-| DP-05 | CSV 인코딩과 필수 컬럼을 검사해야 한다. | detect_encoding, open_csv |
-| DP-06 | 공백·유니코드·기관명·지역명을 정규화해야 한다. | clean_database_builder.py |
-| DP-07 | 프로그램을 자격 기준 종목에 결정론적으로 연결해야 한다. | sport_matching.py, 규칙 JSON |
-| DP-08 | 미매칭·오류 행을 적재 대상에서 분리하고 사유를 남겨야 한다. | 검토 CSV·요약 로그 |
-| DP-09 | 중복과 무결성을 검사한 데이터만 최종 DB로 교체해야 한다. | 임시 SQLite + PRAGMA integrity_check |
-| DP-10 | 수집 결과가 비었거나 급감하면 기존 데이터를 보존해야 한다. | 빈 결과·직전 대비 30% 미만 방어 |
-| DP-11 | 작업 성공·실패 시각, 건수, 오류를 조회할 수 있어야 한다. | 상태 모델·Django 관리자 |
-| DP-12 | 정해진 시간에 자동 실행하고 누락 작업을 보충해야 한다. | APScheduler Cron·Interval 작업 |
+| Backend | Python 3.13, Django 6.1.1 | 서비스 로직, ORM, 폼 검증, 관리 명령 |
+| Frontend | Django Templates, HTML, CSS, JavaScript | 반응형 화면과 사용자 입력 |
+| UI·Chart | Bootstrap, Chart.js | 레이아웃과 데이터 시각화 |
+| AI | google-genai, Gemini | 자격별 시험 교재 추천 |
+| Map | Kakao Maps JavaScript API | 기관 위치 표시 |
+| Collection | requests, BeautifulSoup | KSPO·고용24 데이터 수집 |
+| Data | pandas, openpyxl, Python csv | 공공데이터 검증·정규화 |
+| Database | SQLite, PostgreSQL | 분석 데이터와 커뮤니티 데이터 분리 |
+| Scheduling | APScheduler | 외부 데이터 정기 갱신 |
+| Deployment | Gunicorn, Render, WhiteNoise | 운영 서버와 정적 파일 제공 |
+| Test | Django TestCase, unittest.mock | 기능·파서·정제·예외 검증 |
 
-### 비기능 요구사항
+### 시스템 아키텍처
 
-| ID | 요구사항 | 구현 |
+~~~mermaid
+flowchart TB
+    User[사용자] --> Web[Django Templates]
+    Web --> App[Django 서비스]
+
+    subgraph Modules[서비스 모듈]
+        Recommend[맞춤 추천]
+        Analytics[데이터 분석]
+        Exam[자격·시험·AI 교재]
+        Jobs[고용24 일자리]
+        Substitute[대타 강사]
+        Community[커뮤니티]
+    end
+
+    App --> Recommend
+    App --> Analytics
+    App --> Exam
+    App --> Jobs
+    App --> Substitute
+    App --> Community
+
+    Recommend --> SQLite[(SQLite)]
+    Analytics --> SQLite
+    Exam --> SQLite
+    Exam --> Gemini[Gemini API]
+    Jobs --> PostgreSQL[(PostgreSQL)]
+    Substitute --> PostgreSQL
+    Community --> PostgreSQL
+    Analytics --> Kakao[Kakao Maps]
+
+    KSPO[KSPO] --> Pipeline[수집·정제 파이프라인]
+    Work24[고용24] --> Pipeline
+    PublicCSV[체육 공공데이터] --> Pipeline
+    Pipeline --> SQLite
+    Pipeline --> PostgreSQL
+~~~
+
+### 데이터베이스 분리
+
+| 별칭 | 저장소 | 주요 데이터 |
 |---|---|---|
-| NFR-01 | 수집 모듈은 기존 웹 화면과 분리해 단독 실행할 수 있어야 한다. | Django management command |
-| NFR-02 | 여러 Gunicorn worker가 같은 작업을 중복 실행하지 않아야 한다. | PostgreSQL advisory lock |
-| NFR-03 | 한 번에 대량 데이터를 메모리에 모두 올리지 않아야 한다. | iterator, fetchmany, bulk_create |
-| NFR-04 | 동일 원본을 재처리해도 중복 레코드가 생기지 않아야 한다. | source key·UniqueConstraint |
-| NFR-05 | 외부 DB 장애가 전체 웹 요청을 장시간 차단하지 않아야 한다. | PostgreSQL 연결 제한·예외 처리 |
-| NFR-06 | 스케줄과 저장 결과를 운영 로그와 DB 상태로 확인할 수 있어야 한다. | 콘솔 로그·상태 테이블 |
+| default | SQLite | 종목, 자격 취득, 기관, 프로그램, 신청 현황, 시험 일정 |
+| community | PostgreSQL | 게시글, 댓글, 고용24 공고, 대타 공고·지원·평판 |
 
-## 6. ERD
+Django DB Router가 앱별 저장소를 나누며, 화면에서는 두 데이터베이스의 결과를 하나의 서비스처럼 제공합니다.
 
-평가 대상 파이프라인의 핵심 엔터티만 표시했습니다. ExamSchedule·ExternalJobPosting의 관계는 외래키가 아닌 grade_code·source 기준의 논리적 연결입니다.
+<a id="data"></a>
+
+## 7. 데이터 구조
 
 ~~~mermaid
 erDiagram
-    CANONICAL_SPORT ||--o{ QUALIFICATION_AGGREGATE : aggregates
+    CANONICAL_SPORT ||--o{ QUALIFICATION_AGGREGATE : has
     CANONICAL_SPORT ||--o{ PROGRAM : classifies
     INSTITUTION ||--o{ PROGRAM : operates
     PROGRAM ||--|| PROGRAM_CLEANUP : cleaned_as
     PROGRAM ||--o{ APPLICATION_STATUS : measured_by
-    DATA_SOURCE ||--o{ PROGRAM : imported_from
 
-    EXAM_SCHEDULE_FETCH_STATUS ||..o{ EXAM_SCHEDULE : grade_code
-    WORK24_FETCH_STATUS ||..o{ EXTERNAL_JOB_POSTING : source
+    CANONICAL_SPORT ||--o{ SUBSTITUTE_POSTING : recruits
+    CENTER_CONTACT ||--o{ SUBSTITUTE_POSTING : creates
+    SUBSTITUTE_POSTING ||--o{ SUBSTITUTE_APPLICATION : receives
+    PHONE_IDENTITY ||--o{ SUBSTITUTE_APPLICATION : applies
+    PHONE_IDENTITY ||--o{ REPUTATION_RECORD : accumulates
+
+    COMMUNITY_POST ||--o{ COMMENT : contains
+    WORK24_FETCH_STATUS ||..o{ EXTERNAL_JOB_POSTING : tracks
+    EXAM_FETCH_STATUS ||..o{ EXAM_SCHEDULE : tracks
 
     CANONICAL_SPORT {
         bigint id PK
@@ -204,143 +458,79 @@ erDiagram
         string normalized_name UK
         bigint qualification_count
     }
-    QUALIFICATION_AGGREGATE {
-        bigint id PK
-        int acquisition_year
-        string normalized_region
-        string normalized_sport
-        string qualification_type
-        string grade
-        int acquisition_count
-    }
     INSTITUTION {
         bigint id PK
         string name
-        string normalized_region
-        string normalized_address
+        string region
+        string address
     }
     PROGRAM {
         bigint id PK
         string source_key UK
         bigint institution_id FK
         bigint matched_sport_id FK
-        string normalized_name
+        string name
+        string target
         date start_date
         date end_date
     }
-    PROGRAM_CLEANUP {
+    SUBSTITUTE_POSTING {
         bigint id PK
-        bigint program_id FK
-        string operating_status
-        boolean is_usable
-        string exclusion_reason
-        date reference_date
+        bigint manager_id FK
+        bigint sport_id FK
+        date work_date
+        int pay_amount
+        string status
     }
-    EXAM_SCHEDULE {
+    PHONE_IDENTITY {
         bigint id PK
-        string grade_code
-        string phase
-        string milestone
-        datetime start_at
-        datetime end_at
+        string phone_hash UK
+        string phone_masked
+        string password_hash
     }
-    EXAM_SCHEDULE_FETCH_STATUS {
+    COMMUNITY_POST {
         bigint id PK
-        string grade_code UK
-        datetime last_checked_at
-        datetime last_success_at
-        text last_error
-    }
-    EXTERNAL_JOB_POSTING {
-        bigint id PK
-        string source
-        string external_id
+        string category
         string title
-        string company_name
-        string source_url
-        datetime fetched_at
-    }
-    WORK24_FETCH_STATUS {
-        bigint id PK
-        string source UK
-        datetime last_checked_at
-        datetime last_success_at
-        int last_success_count
-        text last_error
+        string nickname
+        string password_hash
     }
 ~~~
 
-## 7. 주요 프로시저
+### 현재 데이터 규모
 
-### 전체 파이프라인
+2026-09-29 로컬 스냅샷 기준입니다.
 
-~~~mermaid
-flowchart LR
-    A[공공데이터·외부 사이트] --> B[수집]
-    B --> C{응답·형식 검증}
-    C -->|정상| D[정규화·중복 제거·종목 매칭]
-    C -->|실패| H[오류 기록·기존 데이터 유지]
-    D --> E{무결성 검사}
-    E -->|통과| F[SQLite·PostgreSQL 적재]
-    E -->|실패| H
-    F --> G[상태·건수 기록]
-    G --> I[서비스 조회·시연]
-    J[APScheduler] --> B
-~~~
+| 데이터 | 건수 |
+|---|---:|
+| 기준 스포츠 종목 | 113개 |
+| 자격 취득 집계 | 17,467건 |
+| 기관 | 376개 |
+| 전체 프로그램 | 204,461건 |
+| 운영 중·분석 가능 프로그램 | 9,377건 |
+| 운영 종료 프로그램 | 176,619건 |
+| 운영 예정 프로그램 | 18,465건 |
+| 자격등급 | 9개 |
+| 응시자격 경로 | 48건 |
+| 시험 일정 | 388건 |
+| 고용24 채용공고 | 개발 확인 기준 934건 |
 
-### KSPO 자격제도 수집
+<a id="run"></a>
 
-1. 9개 등급 코드를 순회합니다.
-2. 등급별 자격제도 안내 HTML을 요청합니다.
-3. 자격 정의, 근거, 필기 과목, 종목, 검정·연수기관, 합격 기준을 파싱합니다.
-4. 응시자격 경로와 제출서류를 행 단위로 변환합니다.
-5. 등급 요약 CSV, 응시자격 CSV, 결격사유 TXT를 UTF-8로 저장합니다.
-6. 모든 등급이 실패하면 기존 파일을 덮어쓰지 않습니다.
+## 8. 실행 방법
 
-### KSPO 시험 일정 갱신
+### 환경 준비
 
-1. 등급별 연간일정 페이지를 요청합니다.
-2. 필기, 실기·구술, 연수, 최종 발표 단계와 일시를 구조화합니다.
-3. 해당 등급의 새 결과가 비어 있으면 실패로 기록하고 기존 캐시를 유지합니다.
-4. 정상 결과만 트랜잭션 안에서 기존 등급 데이터와 교체합니다.
-5. ExamScheduleFetchStatus에 확인 시각, 성공 시각, 오류를 기록합니다.
-
-### 고용24 공고 갱신
-
-1. 직종 코드 059의 첫 페이지를 GET으로 요청해 세션 쿠키를 얻습니다.
-2. 같은 세션으로 다음 페이지를 POST 요청합니다.
-3. wantedAuthNo를 외부 고유 ID로 사용하고 중복 공고를 제거합니다.
-4. 새 ID가 없거나 마지막 페이지에 도달하면 수집을 종료합니다.
-5. 결과가 0건이거나 직전 성공 건수의 30% 미만이면 구조 변경으로 판단해 기존 데이터를 유지합니다.
-6. 정상 결과는 PostgreSQL 트랜잭션에서 일괄 교체합니다.
-7. 성공 시각·건수 또는 오류를 Work24FetchStatus에 기록합니다.
-
-### 공공데이터 정제 DB 생성
-
-1. UTF-8-SIG, UTF-8, CP949, EUC-KR 순으로 인코딩을 판별합니다.
-2. 필수 컬럼, 취득 연도, 운영 기간, 정원 값을 검증합니다.
-3. 텍스트를 NFKC로 정규화하고 공백·기관명·지역명을 표준화합니다.
-4. 자격 종목을 기준 taxonomy로 만들고 프로그램 종목을 규칙 기반으로 매칭합니다.
-5. 미매칭 행과 오류 행을 별도 CSV로 기록합니다.
-6. 임시 SQLite에 적재한 뒤 중복·빈 이름·날짜 역전·음수·FK 무결성을 검사합니다.
-7. 모든 검사를 통과했을 때만 os.replace로 최종 DB를 교체합니다.
-
-## 실행 방법
-
-명령은 manage.py가 있는 main 디렉터리에서 실행합니다.
-
-### 1. 로컬 환경 준비
+명령은 <code>manage.py</code>가 있는 <code>main</code> 디렉터리에서 실행합니다.
 
 #### Windows
 
 ~~~powershell
 cd main
-"C:/Users/<사용자명>/AppData/Local/Programs/Python/Python313/python.exe" -m venv .venv
+py -3.13 -m venv .venv
 ./.venv/Scripts/Activate.ps1
 python -m pip install -r requirements.txt
 Copy-Item .env.example .env
-python manage.py migrate
-python manage.py migrate --database=community
 ~~~
 
 #### macOS·Linux
@@ -351,196 +541,187 @@ python3.13 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 cp .env.example .env
+~~~
+
+### 환경 변수
+
+~~~dotenv
+SECRET_KEY=replace_with_a_random_secret
+
+COMMUNITY_DB_NAME=community_db
+COMMUNITY_DB_USER=community_user
+COMMUNITY_DB_PASSWORD=replace_with_your_password
+COMMUNITY_DB_HOST=127.0.0.1
+COMMUNITY_DB_PORT=5432
+
+KAKAO_MAP_APP_KEY=replace_with_your_kakao_javascript_key
+GEMINI_API_KEY=replace_with_your_gemini_api_key
+GEMINI_MODEL=gemini-3.6-flash
+
+ENABLE_APSCHEDULER=false
+~~~
+
+### 데이터베이스와 서버 실행
+
+~~~powershell
 python manage.py migrate
 python manage.py migrate --database=community
-~~~
-
-.env에서 COMMUNITY_DB_* 값을 실제 PostgreSQL 접속 정보로 변경해야 고용24 수집과 커뮤니티 기능을 사용할 수 있습니다. 비밀키와 비밀번호가 들어간 .env는 Git에 커밋하지 않습니다.
-
-### 2. 파이프라인 수동 실행
-
-~~~bash
-# KSPO 자격제도 안내 -> CSV·TXT
-python manage.py crawl_license_info
-
-# KSPO 9개 등급 시험 일정 -> SQLite
-python manage.py refresh_exam_schedule
-
-# 특정 등급만 갱신
-python manage.py refresh_exam_schedule --grade LSC2
-
-# 고용24 스포츠·레크리에이션 공고 -> PostgreSQL
-python manage.py sync_work24_jobs
-~~~
-
-### 3. 원본 CSV로 정제 DB 재구축
-
-원본 파일은 개인정보·용량 정책에 따라 저장소에 포함하지 않을 수 있습니다. 실제 파일 경로를 인수로 전달합니다.
-
-~~~bash
-python manage.py build_clean_database +  data/KS_PTDRCTOR_PSEXAM_INFO_202607.csv +  data/KS_PUBLIC_ALSFC_PROGRM_INFO_202607.csv +  --output-dir exports/rebuilt_202607 +  --reference-date 2026-07-31 +  --replace
-~~~
-
-생성 결과:
-
-~~~text
-exports/rebuilt_202607/
-├─ sports_clean_202607.sqlite3  # 검증 완료 정제 DB
-├─ cleaning_summary.txt         # 입력·성공·제외·오류·무결성 건수
-├─ unmatched_programs.csv       # 종목 미매칭 검토 목록
-└─ invalid_rows.csv             # 형식 오류·필수값 누락 목록
-~~~
-
-빈 서비스 DB에 연결할 때만 다음 명령을 실행합니다.
-
-~~~bash
-python manage.py load_clean_service_database +  exports/rebuilt_202607/sports_clean_202607.sqlite3 +  --reference-date 2026-07-31
-~~~
-
-### 4. 웹 서비스 실행
-
-~~~bash
 python manage.py runserver
 ~~~
 
-- 홈·맞춤 추천: <http://127.0.0.1:8000/recommendations/>
-- 프로그램 현황: <http://127.0.0.1:8000/dashboard/>
-- 시험 정보: <http://127.0.0.1:8000/exam-info/>
-- 고용24 일자리: <http://127.0.0.1:8000/community/jobs/>
-- 관리자: <http://127.0.0.1:8000/admin/>
+브라우저에서 <http://127.0.0.1:8000/>에 접속합니다.
 
-## 스케줄 설정
+### 주요 화면
 
-운영 환경에서는 .env 또는 Render 환경 변수에 다음 값을 추가합니다.
+| 기능 | 경로 |
+|---|---|
+| 서비스 홈·맞춤 추천 | /recommendations/ |
+| 자격 보유자 기관 추천 | /recommendations/licensed/ |
+| 미보유자 자격 방향 추천 | /recommendations/unlicensed/ |
+| 통합 대시보드 | /dashboard/ |
+| 지도자 자격 취득 현황 | /instructors/ |
+| 자격·시험 정보 | /exam-info/ |
+| 운영 프로그램 | /current-programs/ |
+| 신청 현황 | /applications/ |
+| 수요·공급 분석 | /demand-supply/ |
+| 커뮤니티 | /community/ |
+| 고용24 일자리 | /community/jobs/ |
+| 대타 강사 모집 | /community/substitutes/ |
+| 관리자 | /admin/ |
 
-~~~dotenv
-ENABLE_APSCHEDULER=true
+<a id="pipeline"></a>
+
+## 9. 데이터 수집과 운영
+
+서비스 기능에 필요한 최신 데이터를 다음 파이프라인으로 관리합니다.
+
+~~~mermaid
+flowchart LR
+    A[KSPO·고용24·공공 CSV] --> B[수집]
+    B --> C[형식·결측·중복 검증]
+    C --> D[지역·종목·기관명 정규화]
+    D --> E[종목 매칭]
+    E --> F[SQLite·PostgreSQL 적재]
+    F --> G[추천·분석·일자리 화면]
 ~~~
 
-Gunicorn 시작 명령:
+### 수동 갱신
 
 ~~~bash
-gunicorn -c gunicorn.conf.py main.wsgi:application
+# KSPO 자격제도 안내
+python manage.py crawl_license_info
+
+# KSPO 전체 시험 일정
+python manage.py refresh_exam_schedule
+
+# 특정 자격등급 시험 일정
+python manage.py refresh_exam_schedule --grade LSC2
+
+# 고용24 스포츠 채용공고
+python manage.py sync_work24_jobs
 ~~~
 
-| 작업 ID | 실행 시간 | 보충 실행 | 중복 방지 |
-|---|---|---|---|
-| work24_daily_sync | 매일 03:00 KST | 기동 30초 후 확인, 이후 1시간마다 | advisory lock + max_instances=1 |
-| exam_schedule_twice_daily_sync | 매일 00:00·12:00 KST | 기동 60초 후 확인, 이후 1시간마다 | advisory lock + max_instances=1 |
+### 정기 갱신
 
-보충 작업은 해당 실행 구간에 이미 성공한 기록이 있으면 수집을 건너뜁니다. 실패 직후에는 한 시간 동안 재시도하지 않아 외부 사이트에 과도한 요청을 보내지 않습니다.
+<code>ENABLE_APSCHEDULER=true</code>인 운영 환경에서 다음 작업을 실행합니다.
 
-## 로그 위치와 상태 확인
+| 데이터 | 실행 시간 |
+|---|---|
+| 고용24 채용공고 | 매일 03:00 KST |
+| KSPO 시험 일정 | 매일 00:00·12:00 KST |
 
-별도 로컬 로그 파일은 생성하지 않습니다. 실행 환경에 따라 다음 위치에서 확인합니다.
+수집 결과가 비었거나 비정상적으로 줄면 기존 데이터를 유지합니다. 마지막 성공 시각과 건수, 오류는 관리자 화면의 수집 상태에서 확인할 수 있습니다.
 
-| 구분 | 위치 | 확인 내용 |
-|---|---|---|
-| 로컬 수동 실행 | 명령을 실행한 터미널의 stdout·stderr | 등급별 성공, 적재 건수, 오류 |
-| 로컬 서버 | runserver·Gunicorn 콘솔 | APScheduler 시작·실행·예외 |
-| Render | 서비스 Dashboard의 Logs | 운영 스케줄 실행 로그 |
-| 고용24 상태 | 관리자 외부 채용정보 갱신 상태 | 마지막 확인·성공 시각, 성공 건수, 오류 |
-| 시험 일정 상태 | 관리자 연간일정계획 갱신 상태 | 등급별 마지막 확인·성공 시각, 오류 |
-| CSV 정제 결과 | exports/rebuilt_202607/cleaning_summary.txt | 원본·성공·제외·오류·무결성 건수 |
+<a id="quality"></a>
 
-상태를 콘솔에서 확인하는 예:
+## 10. 테스트와 현재 제약사항
 
-~~~bash
-python manage.py shell -c "from jobs.models import Work24FetchStatus; print(list(Work24FetchStatus.objects.values()))"
-python manage.py shell -c "from analytics.models import ExamScheduleFetchStatus; print(list(ExamScheduleFetchStatus.objects.values()))"
-~~~
+### 테스트
 
-## 검증
-
-### 시스템·전체 테스트
-
-~~~bash
+~~~powershell
 python manage.py check
 python manage.py test
 ~~~
 
-### 평가 대상 파이프라인 핵심 테스트
+핵심 데이터 처리 테스트만 실행하려면 다음 명령을 사용합니다.
 
-~~~bash
-python manage.py test +  analytics.tests.test_kspo_crawler +  analytics.tests.test_clean_database_builder +  analytics.tests.test_sport_matching
+~~~powershell
+python manage.py test analytics.tests.test_kspo_crawler analytics.tests.test_clean_database_builder analytics.tests.test_sport_matching
 ~~~
 
-2026-09-29 실행 결과:
+자동 테스트가 확인하는 주요 범위:
 
-~~~text
-Ran 30 tests in 0.629s
-OK
-~~~
+- 추천 점수, 지역·종목 일치, 정렬 결정성
+- 추천 페이지 공개 접근과 빈 결과 처리
+- 합성 데이터 사용 안내
+- 고용24 키워드·지역 필터와 페이지네이션
+- 시험 일정·고용24 스케줄 실행 조건
+- HTML 파싱과 외부 요청 오류
+- CSV 인코딩·필수 컬럼·중복·날짜·숫자
+- 프로그램 운영 상태와 종목 매칭
+- SQLite 무결성
 
-검증 범위에는 HTML 파싱, 타임아웃·HTTP 오류, 인코딩, 필수 컬럼, 중복 제거, 운영 상태, 종목 매칭, SQLite 무결성 검사가 포함됩니다. 외부 사이트를 직접 호출하는 테스트는 mock 응답을 사용해 재현 가능하게 구성했습니다.
-
-## 8. 수행 결과
-
-### 실행 결과 확인 경로
-
-| 화면 | 경로 | 확인 내용 |
-|---|---|---|
-| 맞춤 추천 시작 | /recommendations/ | 정제 프로그램·종목·기관 집계 |
-| 프로그램 현황 | /dashboard/ | 기관·프로그램·지역 통계 |
-| 운영 프로그램 | /current-programs/ | 운영 상태, 제외 사유, 판정 근거 |
-| 수요·공급 분석 | /demand-supply/ | 지역별 프로그램·자격 취득 비교 |
-| 시험 정보 | /exam-info/ | KSPO 일정 캐시·자격 안내 |
-| 일자리 공고 | /community/jobs/ | 고용24 수집 공고 검색·페이지네이션 |
-| 관리자 | /admin/ | 수집 상태·오류·적재 데이터 확인 |
-
-### 품질 검증 기준
-
-- 필수 컬럼 누락 시 즉시 중단하고 누락 컬럼명을 출력합니다.
-- 날짜 역전, 음수 정원·취득 건수, 빈 프로그램명은 오류로 분리합니다.
-- 기관·프로그램·운영 기간의 중복을 고유 키로 차단합니다.
-- 미매칭 프로그램을 임의 종목에 연결하지 않고 검토 CSV로 분리합니다.
-- SQLite integrity_check, FK 검사, 중복 집계를 모두 통과해야 최종 DB를 생성합니다.
-- 서비스 DB 적재 후 원본 정제 DB와 종목·기관·자격·프로그램 건수를 다시 비교합니다.
-- 외부 수집 실패 시 기존 정상 데이터를 삭제하지 않습니다.
+커뮤니티의 글·댓글 작성과 비밀번호 확인, 대타 공고 등록·지원·관리 링크·평판 기록은 각 화면의 사용자 흐름으로 시연할 수 있습니다.
 
 ### 데이터 해석 시 유의사항
 
 - 자격 취득 건수는 현재 활동 중인 지도자 수와 같지 않습니다.
 - 프로그램 수와 자격 취득 건수만으로 실제 인력 부족을 확정할 수 없습니다.
-- ApplicationStatus.is_synthetic=True인 신청 현황은 화면 시연용이며 실제 운영 실적이 아닙니다.
-- 고용24 공고는 수집 시점의 공개 목록이며 실제 마감 여부는 원문에서 다시 확인해야 합니다.
-- 추천 결과는 진로 탐색을 위한 참고 정보이며 채용이나 자격 취득을 보장하지 않습니다.
+- 신청 현황의 시연용 합성 데이터는 화면에서 별도로 표시합니다.
+- 추천 결과는 현재 적재 데이터에 따른 탐색 보조 정보이며 취업이나 자격 취득을 보장하지 않습니다.
+- 고용24 공고의 실제 마감 여부와 세부 조건은 원문에서 다시 확인해야 합니다.
 
-## 9. 한 줄 회고
+### 현재 제약사항과 개선 방향
 
-| 팀원 | 회고 |
-|---|---|
-| Leesannn | 수집 성공보다 실패했을 때 기존 데이터를 지키고 다시 실행할 수 있는 구조가 운영에서 더 중요하다는 점을 배웠다. |
-| HYM010219 | 사이트마다 다른 HTML 구조를 데이터 항목으로 바꾸는 과정에서 파싱 규칙과 검증 기준을 함께 설계해야 함을 배웠다. |
-| ericsw2727 | 많은 공공데이터를 서비스에 연결하려면 화면보다 먼저 정규화 기준과 재현 가능한 정제 결과가 필요하다는 점을 배웠다. |
+| 현재 상태 | 영향 | 개선 방향 |
+|---|---|---|
+| 대타 지원 자격 확인이 모의 구현 | 실제 자격 소유 여부를 검증하지 못함 | 회원·자격증 DB 또는 공인 조회 API 연동 |
+| 멘토링은 출시 예정 화면 | 멘토 검색·신청 기능 없음 | 지도자 경력 기반 멘토 매칭 구현 |
+| 일부 신청 현황은 합성 데이터 | 실제 수요로 해석할 수 없음 | 기관별 실제 신청 데이터 연계 |
+| 외부 사이트 HTML 구조 의존 | 구조 변경 시 수집 실패 가능 | 구조 변경 감지와 운영 알림 강화 |
+| 규칙 기반 추천 | 사용자의 장기 성과를 학습하지 않음 | 실제 선택·활동 결과를 반영한 추천 개선 |
+| 전화번호 기반 간편 신원 | 계정 복구와 다중 기기 관리 제한 | 회원 계정과 본인인증 도입 |
 
-## 프로젝트 구조
+<a id="appendix"></a>
+
+## 프로젝트 구조와 출처
+
+### 프로젝트 구조
 
 ~~~text
 main/
-├─ analytics/
-│  ├─ management/commands/       # 자격 수집·시험 갱신·정제 DB 생성·적재
-│  ├─ services/                  # KSPO 수집, 정규화, 종목 매칭, 정제
-│  ├─ tests/                     # 파서·정제·분석 테스트
-│  ├─ program_cleanup_rules.json # 운영 프로그램 정리 규칙
-│  └─ sport_matching_rules.json  # 종목 동의어·상위 종목·문맥 규칙
-├─ jobs/
-│  ├─ management/commands/       # 고용24 수동 동기화
-│  ├─ services/                  # HTTP 요청·페이지 수집·HTML 파싱
-│  ├─ scheduler.py               # Cron·누락 보충·중복 실행 방지
-│  └─ models.py                  # 공고·수집 상태
-├─ data/                         # 생성된 자격정보 CSV·TXT와 시연 데이터
+├─ recommendations/              # 자격·기관 맞춤 추천
+│  ├─ forms.py
+│  ├─ services.py
+│  ├─ views.py
+│  └─ templates/recommendations/
+├─ analytics/                    # 대시보드·자격·프로그램·시험·수요공급
+│  ├─ management/commands/
+│  ├─ services/
+│  ├─ templates/analytics/
+│  └─ tests/
+├─ jobs/                         # 고용24 채용공고
+│  ├─ management/commands/
+│  ├─ services/
+│  └─ scheduler.py
+├─ substitutes/                  # 대타 공고·지원·평판
+├─ community/                    # 게시글·댓글
+├─ data/                         # 자격정보와 서비스 데이터
 ├─ main/
-│  ├─ settings.py                # DB·시간대·환경 설정
-│  └─ db_routers.py              # SQLite·PostgreSQL 라우팅
-├─ gunicorn.conf.py              # worker 시작·종료 시 스케줄러 제어
+│  ├─ settings.py
+│  ├─ urls.py
+│  └─ db_routers.py
+├─ gunicorn.conf.py
 ├─ requirements.txt
 └─ manage.py
 ~~~
 
-## 라이선스·출처
+### 데이터·외부 서비스 출처
 
-수집 데이터의 저작권과 이용 조건은 각 원 제공기관 정책을 따릅니다. 서비스는 원문 전체를 재배포하기보다 검색·분석에 필요한 구조화 항목과 원문 링크를 제공합니다.
+- [국민체육진흥공단 체육지도자 자격검정](https://sqms.kspo.or.kr/)
+- [고용24](https://www.work24.go.kr/)
+- [Kakao Maps API](https://apis.map.kakao.com/)
+- [Google Gemini API](https://ai.google.dev/)
+- [GitHub 저장소](https://github.com/Leesannn/Noanswer3Brothers)
 
-- 국민체육진흥공단 체육지도자 자격검정: <https://sqms.kspo.or.kr/>
-- 고용24: <https://www.work24.go.kr/>
+수집 데이터의 저작권과 이용 조건은 각 제공기관 정책을 따릅니다. 나침은 검색·분석에 필요한 구조화 항목과 원문 링크를 제공합니다.
