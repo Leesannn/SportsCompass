@@ -70,6 +70,15 @@ class PostingForm(forms.ModelForm):
         return self.cleaned_data['region'].strip()
 
 
+class PostingDeleteForm(forms.Form):
+    phone = forms.CharField(label='담당자 휴대폰 번호', max_length=20, help_text='공고 등록 시 입력했던 번호를 입력해 주세요.')
+    password = forms.CharField(label='비밀번호', widget=forms.PasswordInput)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _apply_widget_classes(self.fields)
+
+
 class ApplyForm(forms.Form):
     name = forms.CharField(label='이름', max_length=50)
     phone = forms.CharField(label='휴대폰 번호', max_length=20)

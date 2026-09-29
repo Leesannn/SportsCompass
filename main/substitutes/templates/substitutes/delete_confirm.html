@@ -1,0 +1,15 @@
+{% extends 'analytics/base.html' %}
+{% block title %}공고 삭제 | 단기 대타 구하기{% endblock %}
+{% block content %}
+<div class="recommend-shell form-shell">
+  <h1 class="text-center mb-1">공고 삭제</h1>
+  <p class="text-secondary text-center mb-4">{{ posting.manager.institution_name }} · {{ posting.sport.name }} 대타 공고를 삭제합니다.<br>공고 등록 시 입력한 담당자 휴대폰 번호와 비밀번호를 입력해 주세요.</p>
+  <form method="post" class="recommend-form" novalidate>
+    {% include 'substitutes/_form_fields.html' %}
+    <div class="form-actions">
+      <button class="primary-action" type="submit" onclick="return confirm('이 공고를 삭제하시겠습니까? 삭제하면 신청 내역도 함께 삭제되며 되돌릴 수 없습니다.');">삭제하기</button>
+    </div>
+  </form>
+  <p class="text-center mt-3"><a href="{% url 'substitutes:posting_detail' posting.pk %}">← 공고로 돌아가기</a></p>
+</div>
+{% endblock %}

@@ -2,7 +2,13 @@
 {% block title %}신청자 관리 | {{ posting.manager.institution_name }}{% endblock %}
 {% block content %}
 <div class="form-shell mx-auto">
-  <div class="mb-2"><span class="badge {% if posting.status == 'recruiting' %}text-bg-primary{% else %}text-bg-secondary{% endif %}">{{ posting.get_status_display }}</span> <span class="text-secondary small">관리 링크로 접속됨</span></div>
+  <div class="mb-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div><span class="badge {% if posting.status == 'recruiting' %}text-bg-primary{% else %}text-bg-secondary{% endif %}">{{ posting.get_status_display }}</span> <span class="text-secondary small">관리 링크로 접속됨</span></div>
+    <form method="post" action="{% url 'substitutes:posting_delete' posting.pk token %}" onsubmit="return confirm('이 공고를 삭제하시겠습니까? 삭제하면 신청 내역도 함께 삭제되며 되돌릴 수 없습니다.');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger btn-sm">공고 삭제</button>
+    </form>
+  </div>
   <h1 class="h4 mb-1">{{ posting.manager.institution_name }} · {{ posting.sport.name }} 대타 {{ posting.headcount }}명</h1>
   <p class="text-secondary mb-4">신청자 {{ rows|length }}명 · {{ posting.work_date|date:'n/j(D)' }} {{ posting.start_time|time:'H:i' }}–{{ posting.end_time|time:'H:i' }}</p>
 

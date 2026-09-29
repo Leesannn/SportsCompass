@@ -9,7 +9,7 @@ from django.utils import timezone
 from analytics.services.normalizers import normalize_region
 
 from . import selectors
-from .forms import ApplyForm, EvaluationForm, ManagerVerifyForm, PostingForm
+from .forms import ApplyForm, EvaluationForm, ManagerVerifyForm, PostingDeleteForm, PostingForm
 from .models import Application, CenterContact, PhoneIdentity, Posting, ReputationRecord
 from .services.certification import has_required_certification
 from .services.phone import hash_phone, mask_phone
@@ -30,6 +30,24 @@ def posting_list(request):
 def posting_detail(request, pk):
     posting = get_object_or_404(Posting.objects.select_related('sport', 'manager'), pk=pk)
     return render(request, 'substitutes/detail.html', {'posting': posting})
+
+
+def posting_delete_request(request, pk):
+    posting = get_object_or_404(Posting.objects.select_related('manager'), pk=pk)
+    if request.method == 'POST':
+        form = PostingDeleteForm(request.POST)
+        if form.is_valid():
+            phone_hash = hash_phone(form.cleaned_data['phone'])
+            password = form.cleaned_data['password']
+            if phone_hash != posting.manager.phone_hash or not check_password(password, posting.manager.password_hash):
+                form.add_error(None, '담당자 휴대폰 번호 또는 비밀번호가 일치하지 않습니다.')
+            else:
+                posting.delete()
+                messages.success(request, '공고를 삭제했습니다.')
+                return redirect('substitutes:posting_list')
+    else:
+        form = PostingDeleteForm()
+    return render(request, 'substitutes/delete_confirm.html', {'posting': posting, 'form': form})
 
 
 def application_apply(request, pk):
@@ -120,6 +138,11 @@ def posting_create(request):
     return render(request, 'substitutes/create.html', {'form': posting_form, 'manager': manager})
 
 
+def posting_manager_reset(request):
+    request.session.pop(MANAGER_SESSION_KEY, None)
+    return redirect('substitutes:posting_create')
+
+
 def _get_posting_for_token(pk, token):
     posting_id = verify_management_token(token)
     if posting_id != pk:
@@ -137,6 +160,15 @@ def applicant_manage(request, pk, token):
     return render(request, 'substitutes/manage.html', {
         'posting': posting, 'rows': rows, 'token': token, 'eval_form': EvaluationForm(),
     })
+
+
+def posting_delete(request, pk, token):
+    posting = _get_posting_for_token(pk, token)
+    if request.method == 'POST':
+        posting.delete()
+        messages.success(request, '공고를 삭제했습니다.')
+        return redirect('substitutes:posting_list')
+    return redirect('substitutes:applicant_manage', pk=posting.pk, token=token)
 
 
 def application_evaluate(request, pk, token, application_id):

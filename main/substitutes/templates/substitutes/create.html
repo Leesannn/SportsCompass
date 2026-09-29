@@ -14,7 +14,10 @@
       <div class="fw-bold">{{ manager.phone_masked }} 확인 완료</div>
       <div class="text-secondary small">{{ manager.institution_name }} 담당자로 확인되었습니다</div>
     </div>
-    <span class="badge text-bg-success">확인완료</span>
+    <div class="text-end">
+      <span class="badge text-bg-success">확인완료</span>
+      <div class="mt-1"><a href="{% url 'substitutes:posting_manager_reset' %}" class="small">다른 담당자로 인증하기</a></div>
+    </div>
   </div></div>
   <form method="post" class="recommend-form" novalidate>
     {% include 'substitutes/_form_fields.html' %}
