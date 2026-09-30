@@ -1,5 +1,15 @@
 {% load static %}
-<div class="athlete-stage" data-athlete-stage aria-hidden="true">
+{% get_static_prefix as STATIC_PREFIX %}
+<div class="athlete-stage"
+     data-athlete-stage
+     data-easter-sequence="1,3,2,4"
+     data-easter-background-url="{{ STATIC_PREFIX }}recommendations/images/easter-egg/akaza_bg.png?v={{ cache_version }}"
+     data-easter-image-url="{{ STATIC_PREFIX }}recommendations/images/easter-egg/akaza.png?v={{ cache_version }}"
+     data-easter-symbol-url="{{ STATIC_PREFIX }}recommendations/images/easter-egg/snowflake.svg?v={{ cache_version }}"
+     data-easter-aura-url="{{ STATIC_PREFIX }}recommendations/images/easter-egg/aura.png?v={{ cache_version }}"
+     data-easter-audio-url="{{ STATIC_PREFIX }}recommendations/audio/easter-egg/hidden-track.mp3?v={{ cache_version }}"
+     data-easter-voice-url="{{ STATIC_PREFIX }}recommendations/audio/easter-egg/akaza-voice.mp3?v={{ cache_version }}"
+     aria-hidden="true">
   <canvas class="trajectory-canvas" data-trajectory-canvas></canvas>
 
   <div class="athlete-figure-wrap">
@@ -20,16 +30,16 @@
          width="720" height="1080" alt="" loading="lazy">
   </div>
 
-  <div class="stage-card card-sport" data-stage-card="sport">
+  <div class="stage-card card-sport" data-stage-card="sport" data-easter-key="1">
     <img src="{% static 'recommendations/images/athletes/poster-sport.png' %}" width="360" height="450" alt="" loading="lazy">
   </div>
-  <div class="stage-card card-region" data-stage-card="region">
+  <div class="stage-card card-region" data-stage-card="region" data-easter-key="2">
     <img src="{% static 'recommendations/images/athletes/poster-region.png' %}" width="360" height="450" alt="" loading="lazy">
   </div>
-  <div class="stage-card card-qual" data-stage-card="qual">
+  <div class="stage-card card-qual" data-stage-card="qual" data-easter-key="3">
     <img src="{% static 'recommendations/images/athletes/poster-qualification.png' %}" width="360" height="450" alt="" loading="lazy">
   </div>
-  <div class="stage-card card-org" data-stage-card="org">
+  <div class="stage-card card-org" data-stage-card="org" data-easter-key="4">
     <img src="{% static 'recommendations/images/athletes/poster-institution.png' %}" width="360" height="450" alt="" loading="lazy">
   </div>
 

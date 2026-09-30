@@ -18,6 +18,7 @@
   const timeouts = [];
   let pageVisible = !document.hidden;
   let resizeTimer = 0;
+  let easterEggActive = false;
 
   function safeSessionGet() {
     try { return sessionStorage.getItem(sessionKey); } catch (error) { return null; }
@@ -113,6 +114,7 @@
     }
 
     function activate(nextIndex) {
+      if (easterEggActive) return;
       const targetImage = images[nextIndex];
       if (!targetImage) return;
       index = nextIndex;
@@ -146,6 +148,451 @@
     signal.addEventListener('abort', () => {
       window.clearInterval(autoTimer);
       window.clearTimeout(swimmingLayerTimer);
+    }, { once: true });
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Hidden card sequence easter egg                                  */
+  /* ---------------------------------------------------------------- */
+  function initEasterEgg() {
+    if (!stage) return;
+
+    const sequence = (stage.dataset.easterSequence || '')
+      .split(',')
+      .map((value) => Number.parseInt(value.trim(), 10))
+      .filter((value) => Number.isInteger(value));
+    const cards = Array.from(stage.querySelectorAll('[data-easter-key]'));
+    const resetBadge = stage.querySelector('[data-stage-badge]');
+    const backgroundUrl = stage.dataset.easterBackgroundUrl;
+    const characterUrl = stage.dataset.easterImageUrl;
+    const symbolUrl = stage.dataset.easterSymbolUrl;
+    const auraUrl = stage.dataset.easterAuraUrl;
+    const audioUrl = stage.dataset.easterAudioUrl;
+    const voiceUrl = stage.dataset.easterVoiceUrl;
+
+    if (!sequence.length || !cards.length || !backgroundUrl || !characterUrl || !symbolUrl || !auraUrl || !audioUrl || !voiceUrl) return;
+
+    let inputIndex = 0;
+    const hiddenAudio = new Audio(audioUrl);
+    const voiceAudio = new Audio(voiceUrl);
+    const easterTimers = [];
+
+    hiddenAudio.preload = 'auto';
+    hiddenAudio.volume = 1;
+    hiddenAudio.load();
+    voiceAudio.preload = 'auto';
+    voiceAudio.volume = 0;
+    voiceAudio.loop = true;
+    voiceAudio.load();
+
+    voiceAudio.addEventListener('ended', () => {
+      hiddenAudio.volume = 1;
+    }, { signal });
+
+    function makeElement(tagName, className) {
+      const element = document.createElement(tagName);
+      element.className = className;
+      return element;
+    }
+
+    function buildCrumbleCanvas() {
+      const crumbleCanvas = makeElement('canvas', 'easter-collapse-canvas');
+      crumbleCanvas.setAttribute('aria-hidden', 'true');
+      return crumbleCanvas;
+    }
+
+    function startCrumbleAnimation(crumbleCanvas) {
+      if (!crumbleCanvas) return;
+      if (reduceMotion.matches) {
+        crumbleCanvas.remove();
+        return;
+      }
+
+      const Matter = window.Matter;
+      const PIXI = window.PIXI;
+      if (!Matter || !PIXI) {
+        console.warn('Easter egg physics libraries could not be loaded.');
+        crumbleCanvas.remove();
+        return;
+      }
+
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const impact = { x: width * .5, y: height * .72 };
+      const backgroundColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--editorial-bg').trim() || '#f2efe7';
+      const backgroundNumber = Number.parseInt(backgroundColor.replace('#', ''), 16) || 0xf2efe7;
+      const engine = Matter.Engine.create();
+      const app = new PIXI.Application({
+        view: crumbleCanvas,
+        width,
+        height,
+        resolution: dpr,
+        autoDensity: true,
+        antialias: true,
+        backgroundAlpha: 0,
+      });
+      const shards = [];
+      const dustParticles = [];
+      const physicsLayer = new PIXI.Container();
+      const dustLayer = new PIXI.Container();
+      const solidCover = new PIXI.Graphics();
+
+      app.stage.sortableChildren = true;
+      solidCover.beginFill(backgroundNumber).drawRect(0, 0, width, height).endFill();
+      solidCover.zIndex = 0;
+      physicsLayer.zIndex = 1;
+      dustLayer.zIndex = 2;
+      app.stage.addChild(solidCover, physicsLayer, dustLayer);
+
+      engine.gravity.x = 0;
+      engine.gravity.y = 1.18;
+      engine.gravity.scale = .001;
+
+      function randomBetween(min, max) {
+        return min + Math.random() * (max - min);
+      }
+
+      function clipPolygon(polygon, a, b, c) {
+        const clipped = [];
+        for (let index = 0; index < polygon.length; index += 1) {
+          const current = polygon[index];
+          const previous = polygon[(index + polygon.length - 1) % polygon.length];
+          const currentValue = a * current.x + b * current.y - c;
+          const previousValue = a * previous.x + b * previous.y - c;
+          const currentInside = currentValue <= .01;
+          const previousInside = previousValue <= .01;
+
+          if (currentInside !== previousInside) {
+            const ratio = previousValue / (previousValue - currentValue);
+            clipped.push({
+              x: previous.x + (current.x - previous.x) * ratio,
+              y: previous.y + (current.y - previous.y) * ratio,
+            });
+          }
+          if (currentInside) clipped.push(current);
+        }
+        return clipped;
+      }
+
+      function createWallCells() {
+        const columns = compactMotion.matches ? 5 : 8;
+        const rows = compactMotion.matches ? 6 : 7;
+        const seeds = [];
+
+        for (let row = 0; row < rows; row += 1) {
+          for (let column = 0; column < columns; column += 1) {
+            seeds.push({
+              x: (column + .5 + randomBetween(-.28, .28)) * width / columns,
+              y: (row + .5 + randomBetween(-.3, .3)) * height / rows,
+            });
+          }
+        }
+
+        return seeds.map((seed) => {
+          let polygon = [
+            { x: -2, y: -2 },
+            { x: width + 2, y: -2 },
+            { x: width + 2, y: height + 2 },
+            { x: -2, y: height + 2 },
+          ];
+
+          seeds.forEach((other) => {
+            if (other === seed || polygon.length < 3) return;
+            const a = 2 * (other.x - seed.x);
+            const b = 2 * (other.y - seed.y);
+            const c = other.x * other.x + other.y * other.y - seed.x * seed.x - seed.y * seed.y;
+            polygon = clipPolygon(polygon, a, b, c);
+          });
+          return polygon;
+        }).filter((polygon) => polygon.length >= 3);
+      }
+
+      function createShard(vertices) {
+        const centerX = vertices.reduce((sum, point) => sum + point.x, 0) / vertices.length;
+        const centerY = vertices.reduce((sum, point) => sum + point.y, 0) / vertices.length;
+        const body = Matter.Bodies.fromVertices(centerX, centerY, [vertices], {
+          friction: .78,
+          frictionAir: .008,
+          restitution: .035,
+          density: .0024,
+          chamfer: { radius: 1.5 },
+        }, true);
+        if (!body) return;
+
+        Matter.Body.setStatic(body, true);
+        Matter.World.add(engine.world, body);
+
+        const localPoints = [];
+        body.vertices.forEach((point) => {
+          localPoints.push(point.x - body.position.x, point.y - body.position.y);
+        });
+
+        const container = new PIXI.Container();
+        const brokenEdge = new PIXI.Graphics();
+        const face = new PIXI.Graphics();
+        const crack = new PIXI.Graphics();
+
+        brokenEdge.beginFill(0x514b43, .98).drawPolygon(localPoints).endFill();
+        brokenEdge.position.set(4, 7);
+        brokenEdge.alpha = 0;
+        face.beginFill(backgroundNumber).drawPolygon(localPoints).endFill();
+        crack.lineStyle(1.35, 0x302d29, .92).drawPolygon(localPoints);
+        crack.alpha = 0;
+        container.addChild(brokenEdge, face, crack);
+        container.position.set(body.position.x, body.position.y);
+        physicsLayer.addChild(container);
+
+        const horizontalDistance = Math.abs(centerX - impact.x) / width;
+        const releaseAt = 500
+          + (1 - centerY / height) * 620
+          + horizontalDistance * 150
+          + randomBetween(-70, 85);
+        shards.push({ body, container, brokenEdge, crack, released: false, releaseAt });
+      }
+
+      createWallCells().forEach(createShard);
+
+      const dustSource = new PIXI.Graphics();
+      dustSource.beginFill(0xd7d0c3).drawCircle(12, 12, 12).endFill();
+      const dustTexture = app.renderer.generateTexture(dustSource);
+      dustSource.destroy();
+
+      const particleCount = compactMotion.matches ? 52 : 105;
+      for (let index = 0; index < particleCount; index += 1) {
+        const sprite = new PIXI.Sprite(dustTexture);
+        const scale = randomBetween(.18, .78);
+        sprite.anchor.set(.5);
+        sprite.scale.set(scale);
+        sprite.alpha = 0;
+        dustLayer.addChild(sprite);
+        dustParticles.push({
+          sprite,
+          x: randomBetween(width * .08, width * .92),
+          y: randomBetween(height * .72, height * .99),
+          velocityX: randomBetween(-95, 95),
+          velocityY: randomBetween(-150, -28),
+          start: randomBetween(650, 1450),
+          life: randomBetween(1050, 1900),
+          growth: randomBetween(.75, 1.8),
+          baseScale: scale,
+        });
+      }
+
+      let frameId = 0;
+      let startedAt = 0;
+      let previousTime = 0;
+      let destroyed = false;
+
+      function destroyPhysicsScene() {
+        if (destroyed) return;
+        destroyed = true;
+        window.cancelAnimationFrame(frameId);
+        Matter.World.clear(engine.world, false);
+        Matter.Engine.clear(engine);
+        app.destroy(false, { children: true, texture: true, baseTexture: true });
+        crumbleCanvas.remove();
+      }
+
+      function updateDust(elapsed, deltaSeconds) {
+        dustParticles.forEach((particle) => {
+          const age = elapsed - particle.start;
+          if (age < 0 || age > particle.life) {
+            particle.sprite.alpha = 0;
+            return;
+          }
+          const progress = age / particle.life;
+          particle.velocityY += 45 * deltaSeconds;
+          particle.x += particle.velocityX * deltaSeconds;
+          particle.y += particle.velocityY * deltaSeconds;
+          particle.sprite.position.set(particle.x, particle.y);
+          particle.sprite.scale.set(particle.baseScale * (1 + progress * particle.growth));
+          particle.sprite.alpha = Math.sin(progress * Math.PI) * .42;
+        });
+      }
+
+      function animate(now) {
+        if (!startedAt) {
+          startedAt = now;
+          previousTime = now;
+        }
+        const elapsed = now - startedAt;
+        const deltaMilliseconds = Math.min(now - previousTime, 33.34);
+        const deltaSeconds = deltaMilliseconds / 1000;
+        previousTime = now;
+
+        solidCover.alpha = Math.max(0, Math.min(1, 1 - (elapsed - 420) / 330));
+
+        shards.forEach((shard) => {
+          const crackStart = Math.max(80, shard.releaseAt - 410);
+          shard.crack.alpha = Math.max(0, Math.min(.95, (elapsed - crackStart) / 260));
+
+          if (!shard.released && elapsed >= shard.releaseAt) {
+            shard.released = true;
+            shard.brokenEdge.alpha = 1;
+            Matter.Body.setStatic(shard.body, false);
+            Matter.Body.setVelocity(shard.body, {
+              x: (shard.body.position.x - impact.x) / width * randomBetween(1.1, 2.8),
+              y: randomBetween(-1.7, -.25),
+            });
+            Matter.Body.setAngularVelocity(shard.body, randomBetween(-.035, .035));
+          }
+
+          shard.container.position.set(shard.body.position.x, shard.body.position.y);
+          shard.container.rotation = shard.body.angle;
+        });
+
+        Matter.Engine.update(engine, deltaMilliseconds);
+        updateDust(elapsed, deltaSeconds);
+
+        if (elapsed > 520 && elapsed < 1550) {
+          const strength = (1 - (elapsed - 520) / 1030) * (compactMotion.matches ? 2.5 : 4.5);
+          app.stage.position.set(randomBetween(-strength, strength), randomBetween(-strength * .55, strength * .55));
+        } else {
+          app.stage.position.set(0, 0);
+        }
+
+        const allShardsBelowViewport = shards.every((shard) => (
+          shard.released && shard.body.bounds.min.y > height + 40
+        ));
+        const collapseFinished = elapsed > 3000 && allShardsBelowViewport;
+
+        if (!collapseFinished && elapsed < 6500) {
+          frameId = window.requestAnimationFrame(animate);
+        } else {
+          destroyPhysicsScene();
+        }
+      }
+
+      frameId = window.requestAnimationFrame(animate);
+      signal.addEventListener('abort', () => {
+        destroyPhysicsScene();
+      }, { once: true });
+    }
+
+    function buildEasterScene() {
+      const scene = makeElement('div', 'easter-scene');
+      scene.setAttribute('aria-hidden', 'true');
+
+      const background = makeElement('div', 'easter-scene-background');
+      background.style.backgroundImage = `url("${backgroundUrl}")`;
+
+      const formation = makeElement('div', 'easter-formation');
+      const symbol = makeElement('img', 'easter-compass-symbol');
+      symbol.dataset.src = symbolUrl;
+      symbol.alt = '';
+      symbol.draggable = false;
+
+      const auraWrap = makeElement('div', 'easter-aura-wrap');
+      const aura = makeElement('img', 'easter-aura');
+      aura.src = auraUrl;
+      aura.alt = '';
+      aura.draggable = false;
+      auraWrap.appendChild(aura);
+
+      const character = makeElement('img', 'easter-character');
+      character.src = characterUrl;
+      character.alt = '';
+      character.draggable = false;
+
+      const title = makeElement('div', 'easter-technique-title');
+      const titlePrefix = document.createElement('span');
+      const titleName = document.createElement('strong');
+      titlePrefix.textContent = '파괴살';
+      titleName.textContent = '「나침」';
+      title.append(titlePrefix, titleName);
+
+      formation.append(symbol, auraWrap, character, title);
+      scene.append(background, formation, buildCrumbleCanvas());
+      return scene;
+    }
+
+    function schedule(callback, delay) {
+      easterTimers.push(window.setTimeout(callback, delay));
+    }
+
+    function activateEasterEgg() {
+      if (easterEggActive) return;
+
+      easterEggActive = true;
+      inputIndex = 0;
+      const scene = buildEasterScene();
+
+      document.body.appendChild(scene);
+
+      requestAnimationFrame(() => {
+        scene.classList.add('is-crumbling');
+        startCrumbleAnimation(scene.querySelector('.easter-collapse-canvas'));
+        document.body.classList.add('is-easter-playing');
+      });
+
+      hiddenAudio.currentTime = 0;
+      hiddenAudio.muted = false;
+      hiddenAudio.play().then(() => {
+        scene.classList.add('is-music-playing');
+      }).catch((error) => {
+        console.warn('Easter egg audio playback was blocked.', error);
+      });
+
+      // Unlock the second audio element during the original card click so
+      // browsers also allow the delayed voice line to play later.
+      voiceAudio.currentTime = 0;
+      voiceAudio.volume = 0;
+      voiceAudio.loop = true;
+      voiceAudio.play().catch((error) => {
+        console.warn('Easter egg voice preload was blocked.', error);
+      });
+
+      schedule(() => document.body.classList.add('is-easter-character-landed'), 2200);
+      schedule(() => scene.classList.add('is-character-dropping'), 2800);
+      schedule(() => {
+        const symbol = scene.querySelector('.easter-compass-symbol');
+        if (symbol?.dataset.src) symbol.src = symbol.dataset.src;
+        scene.classList.add('is-symbol-visible');
+      }, 4100);
+      schedule(() => scene.classList.add('is-aura-visible'), 4550);
+      schedule(() => scene.classList.add('is-title-visible'), 7800);
+      schedule(() => {
+        hiddenAudio.volume = .28;
+        voiceAudio.loop = false;
+        voiceAudio.currentTime = 0;
+        voiceAudio.volume = 1;
+        voiceAudio.play().catch((error) => {
+          hiddenAudio.volume = 1;
+          console.warn('Easter egg voice playback was blocked.', error);
+        });
+      }, 8500);
+      schedule(() => {
+        scene.classList.add('is-settled');
+        document.body.classList.remove('is-easter-playing');
+        document.body.classList.add('is-easter-settled');
+      }, 8600);
+    }
+
+    cards.forEach((card) => {
+      card.addEventListener('click', () => {
+        if (easterEggActive) return;
+
+        const key = Number.parseInt(card.dataset.easterKey, 10);
+        if (key === sequence[inputIndex]) {
+          inputIndex += 1;
+          if (inputIndex === sequence.length) activateEasterEgg();
+          return;
+        }
+
+        inputIndex = key === sequence[0] ? 1 : 0;
+      }, { signal });
+    });
+
+    resetBadge?.addEventListener('click', () => {
+      inputIndex = 0;
+    }, { signal });
+
+    signal.addEventListener('abort', () => {
+      easterTimers.forEach((timer) => window.clearTimeout(timer));
+      if (hiddenAudio) hiddenAudio.pause();
+      if (voiceAudio) voiceAudio.pause();
     }, { once: true });
   }
 
@@ -322,6 +769,7 @@
     initReducedMotion();
     initIntroMotion();
     initAthleteSwitcher();
+    initEasterEgg();
     initCanvasTrajectories();
     initPointerParallax();
 
