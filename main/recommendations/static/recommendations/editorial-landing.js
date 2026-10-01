@@ -481,6 +481,7 @@
       const formation = makeElement('div', 'easter-formation');
       const symbol = makeElement('img', 'easter-compass-symbol');
       symbol.dataset.src = symbolUrl;
+      symbol.dataset.easterSymbol = 'back';
       symbol.alt = '';
       symbol.draggable = false;
 
@@ -491,6 +492,24 @@
       aura.draggable = false;
       auraWrap.appendChild(aura);
 
+      const auraFrontWrap = makeElement('div', 'easter-aura-wrap easter-aura-wrap--front');
+      const auraFront = makeElement('img', 'easter-aura easter-aura--front');
+      auraFront.src = auraUrl;
+      auraFront.alt = '';
+      auraFront.draggable = false;
+      auraFrontWrap.appendChild(auraFront);
+
+      const contactGlow = makeElement('div', 'easter-contact-glow');
+
+      const characterSignal = makeElement('div', 'easter-character-signal');
+      const characterGlitchCyan = makeElement('img', 'easter-character-glitch easter-character-glitch--cyan');
+      const characterGlitchRed = makeElement('img', 'easter-character-glitch easter-character-glitch--red');
+      [characterGlitchCyan, characterGlitchRed].forEach((glitch) => {
+        glitch.src = characterUrl;
+        glitch.alt = '';
+        glitch.draggable = false;
+      });
+
       const character = makeElement('img', 'easter-character');
       character.src = characterUrl;
       character.alt = '';
@@ -499,11 +518,23 @@
       const title = makeElement('div', 'easter-technique-title');
       const titlePrefix = document.createElement('span');
       const titleName = document.createElement('strong');
-      titlePrefix.textContent = '파괴살';
-      titleName.textContent = '「나침」';
+      titlePrefix.textContent = '破壊殺・';
+      titleName.setAttribute('aria-label', '「羅針」');
+      [
+        ['「', 'technique-bracket', '0ms'],
+        ['羅', 'technique-kanji', '130ms'],
+        ['針', 'technique-kanji', '430ms'],
+        ['」', 'technique-bracket', '690ms'],
+      ].forEach(([character, className, delay]) => {
+        const glyph = makeElement('i', className);
+        glyph.textContent = character;
+        glyph.style.setProperty('--glyph-delay', delay);
+        glyph.setAttribute('aria-hidden', 'true');
+        titleName.appendChild(glyph);
+      });
       title.append(titlePrefix, titleName);
 
-      formation.append(symbol, auraWrap, character, title);
+      formation.append(symbol, auraWrap, contactGlow, characterSignal, characterGlitchCyan, characterGlitchRed, character, auraFrontWrap, title);
       scene.append(background, formation, buildCrumbleCanvas());
       return scene;
     }
@@ -545,14 +576,16 @@
       });
 
       schedule(() => document.body.classList.add('is-easter-character-landed'), 2200);
-      schedule(() => scene.classList.add('is-character-dropping'), 2800);
+      schedule(() => scene.classList.add('is-character-emerging'), 2800);
       schedule(() => {
-        const symbol = scene.querySelector('.easter-compass-symbol');
-        if (symbol?.dataset.src) symbol.src = symbol.dataset.src;
+        scene.querySelectorAll('[data-easter-symbol]').forEach((snowflake) => {
+          if (snowflake.dataset.src) snowflake.src = snowflake.dataset.src;
+        });
         scene.classList.add('is-symbol-visible');
-      }, 4100);
-      schedule(() => scene.classList.add('is-aura-visible'), 4550);
-      schedule(() => scene.classList.add('is-title-visible'), 7800);
+      }, 3500);
+      schedule(() => {
+        scene.classList.add('is-aura-visible', 'is-title-visible');
+      }, 7800);
       schedule(() => {
         hiddenAudio.volume = .28;
         voiceAudio.loop = false;
@@ -562,7 +595,9 @@
           hiddenAudio.volume = 1;
           console.warn('Easter egg voice playback was blocked.', error);
         });
-      }, 8500);
+      // The final closing bracket finishes at about 8.79s. Let the complete
+      // title hold briefly before Akaza's voice begins.
+      }, 9000);
       schedule(() => {
         scene.classList.add('is-settled');
         document.body.classList.remove('is-easter-playing');
